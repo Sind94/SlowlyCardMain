@@ -139,12 +139,17 @@ const Album = () => {
                   <CardContent className="p-3">
                     <div className={`aspect-[3/4] mb-2 rounded-lg overflow-hidden flex items-center justify-center ${isFound ? 'bg-gradient-to-br from-gray-700 to-gray-800 border-2 border-gray-900 shadow-lg' : 'bg-black/60'}`}> 
                       {isFound ? (
-                        <img 
-                          src={card.image} 
-                          alt={card.name}
-                          className="w-full h-full object-cover"
-                          style={{ boxShadow: '0 2px 12px 0 rgba(0,0,0,0.7)' }}
-                        />
+                        <div className="relative w-full h-full">
+                          <img 
+                            src={card.image} 
+                            alt={card.name}
+                            className="w-full h-full object-cover"
+                            style={{ boxShadow: '0 2px 12px 0 rgba(0,0,0,0.7)' }}
+                          />
+                          {card.holo && (
+                            <div className="absolute inset-0 pointer-events-none holo-effect" />
+                          )}
+                        </div>
                       ) : (
                         <div className="text-4xl text-gray-500">❓</div>
                       )}
@@ -325,6 +330,21 @@ const Album = () => {
           </Card>
         </div>
       </main>
+      <style>
+{`
+.holo-effect {
+  background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(0,255,255,0.15) 30%, rgba(255,0,255,0.15) 60%, rgba(255,255,255,0.2) 100%);
+  background-size: 200% 200%;
+  animation: holo-glitter 2.5s linear infinite;
+  mix-blend-mode: lighten;
+  border-radius: 0.5rem;
+}
+@keyframes holo-glitter {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+`}
+</style>
     </div>
   );
 };

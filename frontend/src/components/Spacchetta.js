@@ -105,12 +105,15 @@ const Spacchetta = () => {
       }}
     >
       <CardContent className="p-4">
-        <div className="aspect-[3/4] mb-3 rounded-lg overflow-hidden">
+        <div className="aspect-[3/4] mb-3 rounded-lg overflow-hidden relative">
           <img 
             src={card.image} 
             alt={card.name}
             className="w-full h-full object-cover"
           />
+          {card.holo && (
+            <div className="absolute inset-0 pointer-events-none holo-effect" />
+          )}
         </div>
         <h3 className="text-lg font-semibold text-center text-white">
           {card.name}
@@ -463,3 +466,19 @@ const Spacchetta = () => {
 };
 
 export default Spacchetta;
+
+<style>
+{`
+.holo-effect {
+  background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(0,255,255,0.15) 30%, rgba(255,0,255,0.15) 60%, rgba(255,255,255,0.2) 100%);
+  background-size: 200% 200%;
+  animation: holo-glitter 2.5s linear infinite;
+  mix-blend-mode: lighten;
+  border-radius: 0.5rem;
+}
+@keyframes holo-glitter {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+`}
+</style>

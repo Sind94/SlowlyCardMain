@@ -32,7 +32,8 @@ const Admin = () => {
   const [cardForm, setCardForm] = useState({
     name: '',
     expansion_id: '',
-    image: ''
+    image: '',
+    holo: false
   });
   const [editingExpansion, setEditingExpansion] = useState(null);
   const [editingCard, setEditingCard] = useState(null);
@@ -133,7 +134,6 @@ const Admin = () => {
 
   const handleCardSubmit = async (e) => {
     e.preventDefault();
-    
     if (!cardForm.expansion_id) {
       toast({
         title: "Errore",
@@ -142,18 +142,16 @@ const Admin = () => {
       });
       return;
     }
-
     try {
       if (editingCard) {
         // Update existing card
         const updated = await cardAPI.update(editingCard.id, {
           name: cardForm.name,
           expansion_id: cardForm.expansion_id,
-          ...(cardForm.image && { image: cardForm.image })
+          ...(cardForm.image && { image: cardForm.image }),
+          holo: cardForm.holo
         });
-        setCards(cards.map(card => 
-          card.id === editingCard.id ? updated : card
-        ));
+        setCards(cards.map(card => card.id === editingCard.id ? updated : card));
         setEditingCard(null);
         toast({
           title: "Carta aggiornata",
@@ -164,7 +162,8 @@ const Admin = () => {
         const newCard = await cardAPI.create({
           name: cardForm.name,
           expansion_id: cardForm.expansion_id,
-          image: cardForm.image || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgdmlld0JveD0iMCAwIDIwMCAyODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjgwIiByeD0iMTAiIGZpbGw9IiNmM2Y0ZjYiLz4KPHN2ZyB4PSI1MCIgeT0iODAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMwIiBmaWxsPSIjZTVlN2ViIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmaWxsPSIjOWNhM2FmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4/PC90ZXh0Pgo8L3N2Zz4KPC9zdmc+"
+          image: cardForm.image || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgdmlld0JveD0iMCAwIDIwMCAyODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjgwIiByeD0iMTAiIGZpbGw9IiNmM2Y0ZjYiLz4KPHN2ZyB4PSI1MCIgeT0iODAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMwIiBmaWxsPSIjZTVlN2ViIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmaWxsPSIjOWNhM2FmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj4/PC90ZXh0Pgo8L3N2Zz4KPC9zdmc+",
+          holo: cardForm.holo
         });
         setCards([...cards, newCard]);
         
@@ -181,7 +180,7 @@ const Admin = () => {
         });
       }
       
-      setCardForm({ name: '', expansion_id: '', image: '' });
+      setCardForm({ name: '', expansion_id: '', image: '', holo: false });
     } catch (error) {
       console.error('Error with card:', error);
       toast({
@@ -564,6 +563,18 @@ const Admin = () => {
                       </div>
                     )}
                   </div>
+                  <div>
+                    <Label htmlFor="card-holo" className="text-white flex items-center space-x-2">
+                      <input
+                        id="card-holo"
+                        type="checkbox"
+                        checked={cardForm.holo}
+                        onChange={e => setCardForm({ ...cardForm, holo: e.target.checked })}
+                        className="mr-2"
+                      />
+                      <span>Olografica</span>
+                    </Label>
+                  </div>
                   <div className="flex space-x-2">
                     <Button type="submit" className="bg-gradient-to-r from-blue-500 to-purple-600" disabled={cardImageUploading || !cardForm.image}>
                       {editingCard ? 'Aggiorna' : 'Crea'} Carta
@@ -614,7 +625,8 @@ const Admin = () => {
                             setCardForm({
                               name: card.name,
                               expansion_id: card.expansion_id,
-                              image: card.image
+                              image: card.image,
+                              holo: card.holo || false
                             });
                           }}
                           className="border-white/30 text-white hover:bg-white/10 text-xs"
