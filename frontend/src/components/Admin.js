@@ -209,12 +209,12 @@ const Admin = () => {
       try {
         data = await res.json();
       } catch (jsonErr) {
-        // Se la risposta non è JSON, mostra errore dettagliato
         const text = await res.text();
         setExpansionImageError('Errore upload immagine su Imgur (risposta non valida)');
+        console.error('[IMGUR RAW RESPONSE]', text);
         toast({
           title: "Errore upload Imgur",
-          description: `Risposta non valida da Imgur: ${text.slice(0,200)}`,
+          description: `Risposta non valida da Imgur: ${text.slice(0,500)}`,
           variant: "destructive",
         });
         setExpansionImageUploading(false);
@@ -264,9 +264,10 @@ const Admin = () => {
       } catch (jsonErr) {
         const text = await res.text();
         setCardImageError('Errore upload immagine su Imgur (risposta non valida)');
+        console.error('[IMGUR RAW RESPONSE]', text);
         toast({
           title: "Errore upload Imgur",
-          description: `Risposta non valida da Imgur: ${text.slice(0,200)}`,
+          description: `Risposta non valida da Imgur: ${text.slice(0,500)}`,
           variant: "destructive",
         });
         setCardImageUploading(false);
