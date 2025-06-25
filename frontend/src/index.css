@@ -112,15 +112,15 @@ button:focus, .btn:focus, [role="button"]:focus {
   inset: 0;
   z-index: 2;
   background: 
-    linear-gradient(120deg, rgba(255,255,255,0.13) 0%, rgba(255,0,255,0.10) 20%, rgba(0,255,255,0.10) 40%, rgba(255,255,0,0.10) 60%, rgba(0,255,128,0.10) 80%, rgba(255,255,255,0.13) 100%),
-    linear-gradient(90deg, rgba(255,0,0,0.08) 0%, rgba(255,255,0,0.10) 25%, rgba(0,255,0,0.10) 50%, rgba(0,255,255,0.10) 75%, rgba(0,0,255,0.08) 100%);
+    linear-gradient(120deg, rgba(255,255,255,0.10) 0%, rgba(255,0,255,0.08) 25%, rgba(0,255,255,0.08) 50%, rgba(255,255,0,0.08) 75%, rgba(0,255,128,0.08) 100%),
+    linear-gradient(90deg, rgba(255,0,0,0.06) 0%, rgba(255,255,0,0.08) 20%, rgba(0,255,0,0.08) 40%, rgba(0,255,255,0.08) 60%, rgba(0,0,255,0.06) 80%, rgba(255,0,255,0.08) 100%);
   background-blend-mode: lighten, screen;
-  background-size: 400% 400%;
-  animation: holo-glitter 18s linear infinite;
+  background-size: 1200% 1200%;
+  animation: holo-glitter 40s linear infinite;
   mix-blend-mode: lighten;
-  box-shadow: 0 0 32px 8px rgba(255,255,255,0.13), 0 0 0 2px rgba(0,255,255,0.08) inset;
+  box-shadow: 0 0 32px 8px rgba(255,255,255,0.10), 0 0 0 2px rgba(0,255,255,0.06) inset;
   opacity: 0.85;
-  filter: saturate(1.3) contrast(1.1);
+  filter: saturate(1.2) contrast(1.08);
 }
 @keyframes holo-glitter {
   0% { background-position: 0% 50%, 100% 0%; }
@@ -133,16 +133,16 @@ button:focus, .btn:focus, [role="button"]:focus {
   top: 0;
   width: 80%;
   height: 100%;
-  background: linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.18) 100%);
-  opacity: 0.7;
-  filter: blur(1.5px) saturate(1.2);
+  background: linear-gradient(120deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 60%, rgba(255,255,255,0.13) 100%);
+  opacity: 0.6;
+  filter: blur(2.5px) saturate(1.1);
   pointer-events: none;
   border-radius: 0.5rem;
-  animation: holo-sheen 22s linear infinite;
+  animation: holo-sheen 60s linear infinite;
 }
 @keyframes holo-sheen {
   0% { left: -60%; opacity: 0.1; }
-  40% { left: 10%; opacity: 0.7; }
-  60% { left: 60%; opacity: 0.7; }
+  40% { left: 10%; opacity: 0.6; }
+  60% { left: 60%; opacity: 0.6; }
   100% { left: 110%; opacity: 0.1; }
 }

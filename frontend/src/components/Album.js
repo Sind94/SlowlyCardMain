@@ -181,12 +181,17 @@ const Album = () => {
                     <DialogTitle>{selectedCard.name}</DialogTitle>
                   </DialogHeader>
                   <div className="flex flex-col items-center">
-                    <img
-                      src={selectedCard.image}
-                      alt={selectedCard.name}
-                      className="w-full max-w-md rounded-lg shadow-lg mb-4"
-                      style={{ objectFit: 'contain', background: '#fff' }}
-                    />
+                    <div className="relative w-full max-w-md mb-4">
+                      <img
+                        src={selectedCard.image}
+                        alt={selectedCard.name}
+                        className="w-full rounded-lg shadow-lg"
+                        style={{ objectFit: 'contain', background: '#fff' }}
+                      />
+                      {selectedCard.holo && (
+                        <div className="holo-effect" />
+                      )}
+                    </div>
                     <div className="text-center text-white/80 text-lg mb-2">{selectedCard.description}</div>
                   </div>
                 </>
