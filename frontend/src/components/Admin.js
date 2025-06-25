@@ -48,6 +48,25 @@ const Admin = () => {
   const [cardImageError, setCardImageError] = useState("");
   const [expansionImageError, setExpansionImageError] = useState("");
 
+  // ImgBB API Key
+  const imgbbApiKey = 'b36c1113deca7e64893ad97457a8d2e6';
+
+  // Funzione generica upload ImgBB
+  const uploadToImgBB = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    if (data.success) {
+      return data.data.url;
+    } else {
+      throw new Error(data.error?.message || 'Errore upload ImgBB');
+    }
+  };
+
   useEffect(() => {
     if (!isAdmin) {
       toast({
@@ -191,107 +210,39 @@ const Admin = () => {
     }
   };
 
-  // Upload file su Imgur e aggiorna il campo image del form espansione
+  // Upload file su ImgBB e aggiorna il campo image del form espansione
   const handleExpansionImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setExpansionImageUploading(true);
     setExpansionImageError("");
-    const formData = new FormData();
-    formData.append('image', file);
     try {
-      const res = await fetch('https://api.imgur.com/3/image', {
-        method: 'POST',
-        headers: { Authorization: `Client-ID ${imgurClientId}` },
-        body: formData
-      });
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (jsonErr) {
-        setExpansionImageError('Errore upload immagine su Imgur (risposta non valida)');
-        console.error('[IMGUR RAW RESPONSE]', text);
-        toast({
-          title: "Errore upload Imgur",
-          description: `Risposta non valida da Imgur: ${text.slice(0,500)}`,
-          variant: "destructive",
-        });
-        setExpansionImageUploading(false);
-        return;
-      }
-      if (data.success) {
-        setExpansionForm({ ...expansionForm, image: data.data.link });
-        setExpansionImageError("");
-        console.log("[IMGUR] Expansion image URL:", data.data.link);
-      } else {
-        setExpansionImageError('Errore upload immagine su Imgur');
-        toast({
-          title: "Errore upload Imgur",
-          description: data.data?.error || 'Errore upload immagine su Imgur',
-          variant: "destructive",
-        });
-      }
+      const url = await uploadToImgBB(file);
+      setExpansionForm({ ...expansionForm, image: url });
+      setExpansionImageError("");
+      toast({ title: "Immagine caricata!", description: "Upload su ImgBB riuscito." });
     } catch (err) {
-      setExpansionImageError('Errore upload immagine su Imgur');
-      toast({
-        title: "Errore upload Imgur",
-        description: err.message,
-        variant: "destructive",
-      });
+      setExpansionImageError('Errore upload immagine su ImgBB');
+      toast({ title: "Errore upload ImgBB", description: err.message, variant: "destructive" });
     } finally {
       setExpansionImageUploading(false);
     }
   };
 
-  // Upload file su Imgur e aggiorna il campo image del form carta
+  // Upload file su ImgBB e aggiorna il campo image del form carta
   const handleCardImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setCardImageUploading(true);
     setCardImageError("");
-    const formData = new FormData();
-    formData.append('image', file);
     try {
-      const res = await fetch('https://api.imgur.com/3/image', {
-        method: 'POST',
-        headers: { Authorization: `Client-ID ${imgurClientId}` },
-        body: formData
-      });
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (jsonErr) {
-        setCardImageError('Errore upload immagine su Imgur (risposta non valida)');
-        console.error('[IMGUR RAW RESPONSE]', text);
-        toast({
-          title: "Errore upload Imgur",
-          description: `Risposta non valida da Imgur: ${text.slice(0,500)}`,
-          variant: "destructive",
-        });
-        setCardImageUploading(false);
-        return;
-      }
-      if (data.success) {
-        setCardForm({ ...cardForm, image: data.data.link });
-        setCardImageError("");
-        console.log("[IMGUR] Card image URL:", data.data.link);
-      } else {
-        setCardImageError('Errore upload immagine su Imgur');
-        toast({
-          title: "Errore upload Imgur",
-          description: data.data?.error || 'Errore upload immagine su Imgur',
-          variant: "destructive",
-        });
-      }
+      const url = await uploadToImgBB(file);
+      setCardForm({ ...cardForm, image: url });
+      setCardImageError("");
+      toast({ title: "Immagine caricata!", description: "Upload su ImgBB riuscito." });
     } catch (err) {
-      setCardImageError('Errore upload immagine su Imgur');
-      toast({
-        title: "Errore upload Imgur",
-        description: err.message,
-        variant: "destructive",
-      });
+      setCardImageError('Errore upload immagine su ImgBB');
+      toast({ title: "Errore upload ImgBB", description: err.message, variant: "destructive" });
     } finally {
       setCardImageUploading(false);
     }
