@@ -25,13 +25,13 @@ const Album = () => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [expansionsData, userCardsData, userData] = await Promise.all([
+        const [expansionsData, allCardsData, userData] = await Promise.all([
           expansionAPI.getAll(),
-          cardAPI.getUserCards(),
+          cardAPI.getAll(),
           authAPI.getCurrentUser()
         ]);
         setExpansions(expansionsData);
-        setCards(userCardsData);
+        setCards(allCardsData);
         setLocalUser(userData);
       } catch (error) {
         console.error('Error fetching data:', error);
