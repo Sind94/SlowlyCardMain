@@ -187,14 +187,41 @@ const Admin = () => {
     }
   };
 
-  const handleImageUpload = (e) => {
+  // Upload file su Imgur e aggiorna il campo image del form espansione
+  const handleExpansionImageUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCardForm({ ...cardForm, image: e.target.result });
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch('https://api.imgur.com/3/image', {
+      method: 'POST',
+      headers: { Authorization: `Client-ID ${imgurClientId}` },
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      setExpansionForm({ ...expansionForm, image: data.data.link });
+    } else {
+      alert('Errore upload immagine su Imgur');
+    }
+  };
+
+  // Upload file su Imgur e aggiorna il campo image del form carta
+  const handleCardImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await fetch('https://api.imgur.com/3/image', {
+      method: 'POST',
+      headers: { Authorization: `Client-ID ${imgurClientId}` },
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      setCardForm({ ...cardForm, image: data.data.link });
+    } else {
+      alert('Errore upload immagine su Imgur');
     }
   };
 
@@ -351,41 +378,12 @@ const Admin = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="flex-1">
-                      <Label htmlFor="exp-image" className="text-white">Immagine (URL)</Label>
-                      <Input
-                        id="exp-image"
-                        type="url"
-                        value={expansionForm.image}
-                        onChange={(e) => setExpansionForm({...expansionForm, image: e.target.value})}
-                        placeholder="https://..."
-                        className="bg-white/10 border-white/20 text-white"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="exp-image-file" className="text-white">Oppure carica</Label>
+                      <Label htmlFor="exp-image-file" className="text-white">Immagine</Label>
                       <Input
                         id="exp-image-file"
                         type="file"
                         accept="image/*"
-                        ref={fileInputRef}
-                        onChange={async (e) => {
-                          const file = e.target.files[0];
-                          if (!file) return;
-                          const formData = new FormData();
-                          formData.append('image', file);
-                          // Upload su Imgur
-                          const res = await fetch('https://api.imgur.com/3/image', {
-                            method: 'POST',
-                            headers: { Authorization: `Client-ID ${imgurClientId}` },
-                            body: formData
-                          });
-                          const data = await res.json();
-                          if (data.success) {
-                            setExpansionForm({...expansionForm, image: data.data.link});
-                          } else {
-                            alert('Errore upload immagine');
-                          }
-                        }}
+                        onChange={handleExpansionImageUpload}
                         className="bg-white/10 border-white/20 text-white"
                       />
                     </div>
@@ -504,12 +502,12 @@ const Admin = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="card-image" className="text-white">Immagine (JPEG)</Label>
+                    <Label htmlFor="card-image" className="text-white">Immagine</Label>
                     <Input
                       id="card-image"
                       type="file"
                       accept="image/jpeg,image/jpg,image/png"
-                      onChange={handleImageUpload}
+                      onChange={handleCardImageUpload}
                       className="bg-white/10 border-white/20 text-white"
                     />
                     {cardForm.image && (
