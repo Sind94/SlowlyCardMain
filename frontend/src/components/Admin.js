@@ -11,9 +11,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { expansionAPI, cardAPI, adminAPI } from '../services/api';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 const Admin = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -37,6 +38,9 @@ const Admin = () => {
   });
   const [editingExpansion, setEditingExpansion] = useState(null);
   const [editingCard, setEditingCard] = useState(null);
+  const [resetUserId, setResetUserId] = useState(null);
+  const [resetPassword, setResetPassword] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
 
   // Check if user is admin
   const isAdmin = user?.is_admin;
@@ -319,14 +323,20 @@ const Admin = () => {
 
   const toggleUserAdmin = async (userId) => {
     try {
-      const user = users.find(u => u.id === userId);
-      const updated = await adminAPI.updateUserAdmin(userId, !user.is_admin);
+      const userToUpdate = users.find(u => u.id === userId);
+      const updated = await adminAPI.updateUserAdmin(userId, !userToUpdate.is_admin);
       setUsers(users.map(u => 
         u.id === userId ? updated : u
       ));
+      // Se in futuro aggiungi funzioni per modificare nickname/email dell'utente loggato:
+      // Dopo la chiamata API di modifica, se user.id === utente modificato, chiama await refreshUser();
+      // Esempio:
+      // if (user && user.id === userIdModificato && typeof refreshUser === 'function') {
+      //   await refreshUser();
+      // }
       toast({
         title: `Ruolo aggiornato`,
-        description: `${user.nickname} è ora ${user.is_admin ? 'utente normale' : 'amministratore'}`,
+        description: `${userToUpdate.nickname} è ora ${userToUpdate.is_admin ? 'utente normale' : 'amministratore'}`,
       });
     } catch (error) {
       console.error('Error updating user:', error);
@@ -688,6 +698,9 @@ const Admin = () => {
                             try {
                               await adminAPI.resetUserFoundCards(user.id);
                               setUsers(users.map(u => u.id === user.id ? { ...u, found_cards: [] } : u));
+                              if (user.id === user.id && typeof refreshUser === 'function') {
+                                await refreshUser();
+                              }
                               toast({
                                 title: "Carte trovate azzerate",
                                 description: `Tutte le carte trovate di ${user.nickname} sono state azzerate.`
@@ -704,12 +717,58 @@ const Admin = () => {
                         >
                           Azzera carte trovate
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setResetUserId(user.id)}
+                          className="ml-2"
+                        >
+                          Reset password
+                        </Button>
                       </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+
+            <Dialog open={!!resetUserId} onOpenChange={v => { if (!v) { setResetUserId(null); setResetPassword(""); } }}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Reset password utente</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <p className="text-white">Imposta una password temporanea per l'utente. Dovrà cambiarla al prossimo accesso.</p>
+                  <input
+                    type="text"
+                    className="w-full p-2 rounded bg-white/10 border border-white/20 text-white"
+                    placeholder="Nuova password temporanea"
+                    value={resetPassword}
+                    onChange={e => setResetPassword(e.target.value)}
+                    autoFocus
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => { setResetUserId(null); setResetPassword(""); }}>Annulla</Button>
+                    <Button
+                      variant="destructive"
+                      disabled={resetLoading || !resetPassword}
+                      onClick={async () => {
+                        setResetLoading(true);
+                        try {
+                          await adminAPI.resetUserPassword(resetUserId, { new_password: resetPassword });
+                          toast({ title: "Password resettata", description: "La password è stata aggiornata." });
+                          setResetUserId(null); setResetPassword("");
+                        } catch (error) {
+                          toast({ title: "Errore", description: error.response?.data?.detail || "Errore durante il reset password", variant: "destructive" });
+                        } finally { setResetLoading(false); }
+                      }}
+                    >
+                      Conferma reset
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
         </Tabs>
       </main>

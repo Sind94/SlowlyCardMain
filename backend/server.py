@@ -345,6 +345,15 @@ async def reset_user_found_cards(user_id: str, current_user: User = Depends(get_
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "Carte trovate azzerate per l'utente"}
 
+@api_router.post("/admin/users/{user_id}/reset_password")
+async def reset_user_password(user_id: str, new_password: str, current_user: User = Depends(get_current_admin_user)):
+    """Resetta la password di un utente (solo admin)"""
+    hashed = get_password_hash(new_password)
+    result = await db.users.update_one({"id": user_id}, {"$set": {"hashed_password": hashed}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "Password resettata con successo"}
+
 # ========== USER CARDS ENDPOINT ==========
 
 @api_router.get("/user/cards", response_model=List[Card])
