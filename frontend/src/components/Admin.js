@@ -42,6 +42,11 @@ const Admin = () => {
   const imgurClientId = '546b1b1b1b1b1b1'; // Sostituisci con il tuo client ID Imgur se vuoi personalizzato
   const fileInputRef = useRef();
 
+  const [cardImageUploading, setCardImageUploading] = useState(false);
+  const [expansionImageUploading, setExpansionImageUploading] = useState(false);
+  const [cardImageError, setCardImageError] = useState("");
+  const [expansionImageError, setExpansionImageError] = useState("");
+
   useEffect(() => {
     if (!isAdmin) {
       toast({
@@ -191,18 +196,38 @@ const Admin = () => {
   const handleExpansionImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    setExpansionImageUploading(true);
+    setExpansionImageError("");
     const formData = new FormData();
     formData.append('image', file);
-    const res = await fetch('https://api.imgur.com/3/image', {
-      method: 'POST',
-      headers: { Authorization: `Client-ID ${imgurClientId}` },
-      body: formData
-    });
-    const data = await res.json();
-    if (data.success) {
-      setExpansionForm({ ...expansionForm, image: data.data.link });
-    } else {
-      alert('Errore upload immagine su Imgur');
+    try {
+      const res = await fetch('https://api.imgur.com/3/image', {
+        method: 'POST',
+        headers: { Authorization: `Client-ID ${imgurClientId}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setExpansionForm({ ...expansionForm, image: data.data.link });
+        setExpansionImageError("");
+        console.log("[IMGUR] Expansion image URL:", data.data.link);
+      } else {
+        setExpansionImageError('Errore upload immagine su Imgur');
+        toast({
+          title: "Errore upload Imgur",
+          description: data.data?.error || 'Errore upload immagine su Imgur',
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      setExpansionImageError('Errore upload immagine su Imgur');
+      toast({
+        title: "Errore upload Imgur",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setExpansionImageUploading(false);
     }
   };
 
@@ -210,18 +235,38 @@ const Admin = () => {
   const handleCardImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    setCardImageUploading(true);
+    setCardImageError("");
     const formData = new FormData();
     formData.append('image', file);
-    const res = await fetch('https://api.imgur.com/3/image', {
-      method: 'POST',
-      headers: { Authorization: `Client-ID ${imgurClientId}` },
-      body: formData
-    });
-    const data = await res.json();
-    if (data.success) {
-      setCardForm({ ...cardForm, image: data.data.link });
-    } else {
-      alert('Errore upload immagine su Imgur');
+    try {
+      const res = await fetch('https://api.imgur.com/3/image', {
+        method: 'POST',
+        headers: { Authorization: `Client-ID ${imgurClientId}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCardForm({ ...cardForm, image: data.data.link });
+        setCardImageError("");
+        console.log("[IMGUR] Card image URL:", data.data.link);
+      } else {
+        setCardImageError('Errore upload immagine su Imgur');
+        toast({
+          title: "Errore upload Imgur",
+          description: data.data?.error || 'Errore upload immagine su Imgur',
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      setCardImageError('Errore upload immagine su Imgur');
+      toast({
+        title: "Errore upload Imgur",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setCardImageUploading(false);
     }
   };
 
@@ -394,7 +439,7 @@ const Admin = () => {
                     </div>
                   )}
                   <div className="flex space-x-2">
-                    <Button type="submit" className="bg-gradient-to-r from-green-500 to-emerald-600">
+                    <Button type="submit" className="bg-gradient-to-r from-green-500 to-emerald-600" disabled={expansionImageUploading || !expansionForm.image}>
                       {editingExpansion ? 'Aggiorna' : 'Crea'} Espansione
                     </Button>
                     {editingExpansion && (
@@ -411,6 +456,9 @@ const Admin = () => {
                       </Button>
                     )}
                   </div>
+                  {expansionImageUploading && <span className="text-xs text-white ml-2">Caricamento immagine...</span>}
+                  {expansionImageError && <span className="text-xs text-red-400 ml-2">{expansionImageError}</span>}
+                  {expansionForm.image && <span className="text-xs text-green-400 ml-2">URL: {expansionForm.image}</span>}
                 </form>
               </CardContent>
             </Card>
@@ -517,7 +565,7 @@ const Admin = () => {
                     )}
                   </div>
                   <div className="flex space-x-2">
-                    <Button type="submit" className="bg-gradient-to-r from-blue-500 to-purple-600">
+                    <Button type="submit" className="bg-gradient-to-r from-blue-500 to-purple-600" disabled={cardImageUploading || !cardForm.image}>
                       {editingCard ? 'Aggiorna' : 'Crea'} Carta
                     </Button>
                     {editingCard && (
@@ -534,6 +582,9 @@ const Admin = () => {
                       </Button>
                     )}
                   </div>
+                  {cardImageUploading && <span className="text-xs text-white ml-2">Caricamento immagine...</span>}
+                  {cardImageError && <span className="text-xs text-red-400 ml-2">{cardImageError}</span>}
+                  {cardForm.image && <span className="text-xs text-green-400 ml-2">URL: {cardForm.image}</span>}
                 </form>
               </CardContent>
             </Card>
