@@ -326,6 +326,16 @@ async def update_user_admin_status(
     updated_user = await db.users.find_one({"id": user_id})
     return user_to_response(User(**updated_user))
 
+# ========== USER CARDS ENDPOINT ==========
+
+@api_router.get("/user/cards", response_model=List[Card])
+async def get_user_cards(current_user: User = Depends(get_current_user)):
+    """Get only the cards found by the authenticated user"""
+    if not current_user.found_cards:
+        return []
+    cards = await db.cards.find({"id": {"$in": current_user.found_cards}}).to_list(1000)
+    return [Card(**card) for card in cards]
+
 # ========== BASIC HEALTH CHECK ==========
 
 @api_router.get("/")

@@ -95,6 +95,11 @@ export const cardAPI = {
   delete: async (id) => {
     const response = await api.delete(`/cards/${id}`);
     return response.data;
+  },
+
+  getUserCards: async () => {
+    const response = await api.get('/user/cards');
+    return response.data;
   }
 };
 

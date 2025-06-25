@@ -25,13 +25,13 @@ const Album = () => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [expansionsData, cardsData, userData] = await Promise.all([
+        const [expansionsData, userCardsData, userData] = await Promise.all([
           expansionAPI.getAll(),
-          cardAPI.getAll(),
+          cardAPI.getUserCards(),
           authAPI.getCurrentUser()
         ]);
         setExpansions(expansionsData);
-        setCards(cardsData);
+        setCards(userCardsData);
         setLocalUser(userData);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -40,7 +40,7 @@ const Album = () => {
       }
     };
     fetchAll();
-  }, [location]);
+  }, []);
 
   const getFoundCardsForExpansion = (expansionId) => {
     return cards.filter(card => 
