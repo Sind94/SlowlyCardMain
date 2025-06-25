@@ -173,15 +173,23 @@ async def delete_expansion(
     current_user: User = Depends(get_current_admin_user)
 ):
     """Delete an expansion and all its cards (Admin only)"""
-    # Delete all cards from this expansion
+    # Trova tutte le carte dell'espansione
+    cards = await db.cards.find({"expansion_id": expansion_id}).to_list(1000)
+    card_ids = [card["id"] for card in cards]
+
+    # Elimina tutte le carte dell'espansione
     await db.cards.delete_many({"expansion_id": expansion_id})
-    
-    # Delete the expansion
+
+    # Rimuovi tutti gli ID delle carte eliminate da tutti gli utenti
+    if card_ids:
+        await db.users.update_many({}, {"$pull": {"found_cards": {"$in": card_ids}}})
+
+    # Elimina l'espansione
     result = await db.expansions.delete_one({"id": expansion_id})
-    
+
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Expansion not found")
-    
+
     return {"message": "Expansion and all its cards deleted successfully"}
 
 # ========== CARD ENDPOINTS ==========
@@ -254,6 +262,9 @@ async def delete_card(
     # Delete the card
     await db.cards.delete_one({"id": card_id})
     
+    # Remove card id from all users' found_cards
+    await db.users.update_many({}, {"$pull": {"found_cards": card_id}})
+
     # Update expansion total_cards count
     await db.expansions.update_one(
         {"id": card["expansion_id"]},
