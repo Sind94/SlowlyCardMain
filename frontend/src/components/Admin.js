@@ -205,7 +205,21 @@ const Admin = () => {
         headers: { Authorization: `Client-ID ${imgurClientId}` },
         body: formData
       });
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        // Se la risposta non è JSON, mostra errore dettagliato
+        const text = await res.text();
+        setExpansionImageError('Errore upload immagine su Imgur (risposta non valida)');
+        toast({
+          title: "Errore upload Imgur",
+          description: `Risposta non valida da Imgur: ${text.slice(0,200)}`,
+          variant: "destructive",
+        });
+        setExpansionImageUploading(false);
+        return;
+      }
       if (data.success) {
         setExpansionForm({ ...expansionForm, image: data.data.link });
         setExpansionImageError("");
@@ -244,7 +258,20 @@ const Admin = () => {
         headers: { Authorization: `Client-ID ${imgurClientId}` },
         body: formData
       });
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        const text = await res.text();
+        setCardImageError('Errore upload immagine su Imgur (risposta non valida)');
+        toast({
+          title: "Errore upload Imgur",
+          description: `Risposta non valida da Imgur: ${text.slice(0,200)}`,
+          variant: "destructive",
+        });
+        setCardImageUploading(false);
+        return;
+      }
       if (data.success) {
         setCardForm({ ...cardForm, image: data.data.link });
         setCardImageError("");
