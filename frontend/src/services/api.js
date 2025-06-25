@@ -126,13 +126,6 @@ export const adminAPI = {
   resetUserFoundCards: async (userId) => {
     const response = await api.post(`/admin/users/${userId}/reset_found_cards`);
     return response.data;
-  },
-
-  resetUserPassword: async (userId, newPassword) => {
-    const response = await api.post(`/admin/users/${userId}/reset_password`, newPassword, {
-      headers: { 'Content-Type': 'application/json' }
-    });
-    return response.data;
   }
 };
 
