@@ -189,7 +189,7 @@ const Album = () => {
                         style={{ objectFit: 'contain', background: '#fff' }}
                       />
                       {selectedCard.holo && (
-                        <div className="holo-effect" />
+                        <div className="absolute inset-0 pointer-events-none holo-effect rounded-lg" />
                       )}
                     </div>
                     <div className="text-center text-white/80 text-lg mb-2">{selectedCard.description}</div>
