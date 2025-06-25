@@ -250,14 +250,15 @@ const Album = () => {
               >
                 <CardHeader className="text-center">
                   <div 
-                    className="w-24 h-32 mx-auto mb-4 rounded-lg overflow-hidden transform transition-all duration-300 group-hover:rotate-3"
+                    className="w-24 h-32 mx-auto mb-4 rounded-lg overflow-hidden flex items-center justify-center bg-white/5"
                     style={{ backgroundColor: expansion.color }}
                   >
                     {expansion.image ? (
                       <img 
                         src={expansion.image} 
                         alt={expansion.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-center"
+                        style={{ display: 'block' }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-white text-2xl">
