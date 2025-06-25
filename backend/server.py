@@ -337,6 +337,14 @@ async def update_user_admin_status(
     updated_user = await db.users.find_one({"id": user_id})
     return user_to_response(User(**updated_user))
 
+@api_router.post("/admin/users/{user_id}/reset_found_cards")
+async def reset_user_found_cards(user_id: str, current_user: User = Depends(get_current_admin_user)):
+    """Resetta tutte le carte trovate di un utente (solo admin)"""
+    result = await db.users.update_one({"id": user_id}, {"$set": {"found_cards": []}})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": "Carte trovate azzerate per l'utente"}
+
 # ========== USER CARDS ENDPOINT ==========
 
 @api_router.get("/user/cards", response_model=List[Card])

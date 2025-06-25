@@ -681,6 +681,29 @@ const Admin = () => {
                         >
                           {user.is_admin ? "Rimuovi Admin" : "Rendi Admin"}
                         </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={async () => {
+                            try {
+                              await adminAPI.resetUserFoundCards(user.id);
+                              setUsers(users.map(u => u.id === user.id ? { ...u, found_cards: [] } : u));
+                              toast({
+                                title: "Carte trovate azzerate",
+                                description: `Tutte le carte trovate di ${user.nickname} sono state azzerate.`
+                              });
+                            } catch (error) {
+                              toast({
+                                title: "Errore",
+                                description: error.response?.data?.detail || "Errore durante l'azzeramento delle carte trovate",
+                                variant: "destructive"
+                              });
+                            }
+                          }}
+                          className="ml-2"
+                        >
+                          Azzera carte trovate
+                        </Button>
                       </div>
                     </div>
                   ))}

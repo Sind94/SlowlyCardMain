@@ -121,6 +121,11 @@ export const adminAPI = {
   updateUserAdmin: async (userId, isAdmin) => {
     const response = await api.put(`/admin/users/${userId}`, { is_admin: isAdmin });
     return response.data;
+  },
+  
+  resetUserFoundCards: async (userId) => {
+    const response = await api.post(`/admin/users/${userId}/reset_found_cards`);
+    return response.data;
   }
 };
 
