@@ -104,3 +104,45 @@ button:focus, .btn:focus, [role="button"]:focus {
 .logout-btn, .logout-btn * {
   color: #111 !important;
 }
+
+.holo-effect {
+  pointer-events: none;
+  border-radius: 0.5rem;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  /* Overlay base con gradienti arcobaleno */
+  background: 
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.12) 0 2px, rgba(0,0,0,0) 2px 6px),
+    linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(0,255,255,0.12) 30%, rgba(255,0,255,0.12) 60%, rgba(255,255,255,0.18) 100%),
+    linear-gradient(90deg, rgba(255,255,255,0.08) 0%, rgba(255,255,0,0.10) 50%, rgba(0,255,255,0.08) 100%);
+  background-blend-mode: lighten, screen, color-dodge;
+  background-size: 200% 200%;
+  animation: holo-glitter 2.5s linear infinite;
+  mix-blend-mode: lighten;
+  box-shadow: 0 0 32px 8px rgba(255,255,255,0.12), 0 0 0 2px rgba(0,255,255,0.08) inset;
+}
+@keyframes holo-glitter {
+  0% { background-position: 0% 50%, 100% 0%, 0% 100%; }
+  100% { background-position: 100% 50%, 0% 100%, 100% 0%; }
+}
+.holo-effect::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  top: 0;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 60%, rgba(255,255,255,0.18) 100%);
+  opacity: 0.7;
+  filter: blur(1.5px);
+  pointer-events: none;
+  border-radius: 0.5rem;
+  animation: holo-sheen 3.5s linear infinite;
+}
+@keyframes holo-sheen {
+  0% { left: -60%; opacity: 0.1; }
+  40% { left: 10%; opacity: 0.7; }
+  60% { left: 60%; opacity: 0.7; }
+  100% { left: 110%; opacity: 0.1; }
+}
