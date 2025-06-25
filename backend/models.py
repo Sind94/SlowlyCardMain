@@ -33,11 +33,13 @@ class ExpansionCreate(BaseModel):
     name: str
     description: str
     color: str
+    image: Optional[str] = None
 
 class ExpansionUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     color: Optional[str] = None
+    image: Optional[str] = None
 
 class Expansion(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

@@ -384,17 +384,20 @@ const Spacchetta = () => {
               >
                 <CardHeader className="text-center">
                   <div 
-                    className="w-32 h-40 mx-auto mb-4 rounded-lg overflow-hidden transform transition-all duration-300 group-hover:rotate-3 shadow-xl flex items-center justify-center"
+                    className="w-32 h-40 mx-auto mb-4 rounded-lg overflow-hidden flex items-center justify-center bg-white/5"
                     style={{ backgroundColor: expansion.color }}
                   >
                     {expansion.image ? (
                       <img 
                         src={expansion.image} 
                         alt={expansion.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-center"
+                        style={{ display: 'block' }}
                       />
                     ) : (
-                      <div className="text-4xl text-white">📦</div>
+                      <div className="w-full h-full flex items-center justify-center text-white text-4xl">
+                        📦
+                      </div>
                     )}
                   </div>
                   <CardTitle className="text-2xl text-white mb-2">
