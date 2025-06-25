@@ -205,11 +205,11 @@ const Admin = () => {
         headers: { Authorization: `Client-ID ${imgurClientId}` },
         body: formData
       });
+      const text = await res.text();
       let data;
       try {
-        data = await res.json();
+        data = JSON.parse(text);
       } catch (jsonErr) {
-        const text = await res.text();
         setExpansionImageError('Errore upload immagine su Imgur (risposta non valida)');
         console.error('[IMGUR RAW RESPONSE]', text);
         toast({
@@ -258,11 +258,11 @@ const Admin = () => {
         headers: { Authorization: `Client-ID ${imgurClientId}` },
         body: formData
       });
+      const text = await res.text();
       let data;
       try {
-        data = await res.json();
+        data = JSON.parse(text);
       } catch (jsonErr) {
-        const text = await res.text();
         setCardImageError('Errore upload immagine su Imgur (risposta non valida)');
         console.error('[IMGUR RAW RESPONSE]', text);
         toast({
