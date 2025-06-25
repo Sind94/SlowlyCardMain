@@ -213,11 +213,11 @@ async def create_card(
         {"$inc": {"total_cards": 1}}
     )
 
-    # AUTOMATIC: Add new card to found_cards of all users (or only admin)
-    await db.users.update_many(
-        {},  # Per tutti gli utenti, oppure {"is_admin": True} solo per admin
-        {"$addToSet": {"found_cards": card.id}}
-    )
+    # (RIMOSSO) Non aggiungere la carta a tutti gli utenti!
+    # await db.users.update_many(
+    #     {},  # Per tutti gli utenti, oppure {"is_admin": True} solo per admin
+    #     {"$addToSet": {"found_cards": card.id}}
+    # )
     
     return card
 
