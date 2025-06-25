@@ -112,29 +112,43 @@ button:focus, .btn:focus, [role="button"]:focus {
   inset: 0;
   z-index: 2;
   background:
-    repeating-linear-gradient(120deg, rgba(255,255,255,0.13) 0 5%, rgba(255,255,255,0.00) 10% 20%),
-    linear-gradient(120deg, rgba(255,0,128,0.22) 0%, rgba(0,255,255,0.18) 30%, rgba(255,255,0,0.18) 60%, rgba(255,0,128,0.22) 100%),
-    linear-gradient(100deg, rgba(255,0,0,0.13) 0%, rgba(0,255,255,0.13) 100%);
-  background-blend-mode: lighten, screen, lighten;
+    repeating-linear-gradient(120deg, rgba(255,255,255,0.15) 0 5%, rgba(255,255,255,0.00) 10% 20%),
+    linear-gradient(120deg, 
+      rgba(255,0,255,0.35) 0%,
+      rgba(0,255,255,0.35) 20%,
+      rgba(255,255,0,0.35) 40%,
+      rgba(255,0,128,0.35) 60%,
+      rgba(0,255,128,0.35) 80%,
+      rgba(128,0,255,0.35) 100%
+    ),
+    linear-gradient(100deg, 
+      rgba(255,0,0,0.25) 0%,
+      rgba(0,255,255,0.25) 33%,
+      rgba(255,255,0,0.25) 66%,
+      rgba(255,0,0,0.25) 100%
+    );
+  background-blend-mode: screen, screen, lighten;
   background-size: 200% 200%, 400% 400%, 600% 600%;
   animation: holo-diag-move 18s linear infinite, holo-pulse 3.5s ease-in-out infinite;
-  mix-blend-mode: lighten;
-  box-shadow: 0 0 32px 8px rgba(255,255,255,0.13), 0 0 0 2px rgba(0,255,255,0.09) inset;
-  opacity: 0.92;
-  filter: saturate(1.4) contrast(1.15) blur(0.1px);
+  mix-blend-mode: color-dodge;
+  box-shadow: 
+    0 0 32px 8px rgba(255,255,255,0.15),
+    0 0 8px 4px rgba(128,255,255,0.2) inset;
+  opacity: 0.95;
+  filter: saturate(1.8) contrast(1.2) brightness(1.1) blur(0.2px);
 }
 @keyframes holo-diag-move {
   0% { background-position: 0% 0%, 100% 0%, 0% 100%; }
   100% { background-position: 100% 100%, 0% 100%, 100% 0%; }
 }
 @keyframes holo-pulse {
-  0% { opacity: 0.18; }
-  10% { opacity: 0.35; }
-  20% { opacity: 0.55; }
-  40% { opacity: 0.92; }
-  60% { opacity: 0.92; }
-  80% { opacity: 0.35; }
-  100% { opacity: 0.18; }
+  0% { opacity: 0.25; }
+  10% { opacity: 0.45; }
+  20% { opacity: 0.65; }
+  40% { opacity: 0.95; }
+  60% { opacity: 0.95; }
+  80% { opacity: 0.45; }
+  100% { opacity: 0.25; }
 }
 .holo-effect::after {
   content: '';
@@ -143,16 +157,22 @@ button:focus, .btn:focus, [role="button"]:focus {
   top: 0;
   width: 80%;
   height: 100%;
-  background: linear-gradient(120deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0.22) 100%);
-  opacity: 0.5;
-  filter: blur(2.5px) saturate(1.1);
+  background: linear-gradient(120deg, 
+    rgba(255,255,255,0.4) 0%, 
+    rgba(255,255,255,0.1) 45%,
+    rgba(255,255,255,0.4) 55%,
+    rgba(255,255,255,0.1) 100%
+  );
+  opacity: 0.6;
+  filter: blur(3px) saturate(1.2);
   pointer-events: none;
   border-radius: 0.5rem;
-  animation: holo-sheen 60s linear infinite;
+  animation: holo-sheen 8s ease-in-out infinite;
+  mix-blend-mode: soft-light;
 }
 @keyframes holo-sheen {
-  0% { left: -60%; opacity: 0.1; }
-  40% { left: 10%; opacity: 0.6; }
-  60% { left: 60%; opacity: 0.6; }
-  100% { left: 110%; opacity: 0.1; }
+  0% { transform: translateX(-100%) skewX(45deg); opacity: 0.2; }
+  25% { opacity: 0.6; }
+  50% { transform: translateX(100%) skewX(45deg); opacity: 0.2; }
+  100% { transform: translateX(-100%) skewX(45deg); opacity: 0.2; }
 }
