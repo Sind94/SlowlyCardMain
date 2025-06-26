@@ -20,6 +20,8 @@ const Album = () => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedExpansion, setSelectedExpansion] = useState(null);
+  const [selectedExpansionImage, setSelectedExpansionImage] = useState(null);
+  const [expansionImageDialogOpen, setExpansionImageDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -118,6 +120,18 @@ const Album = () => {
         </header>
 
         <main className="container mx-auto px-4 py-8">
+          {/* Immagine espansione centrale e cliccabile */}
+          {selectedExpansion.image && (
+            <div className="flex justify-center mb-8">
+              <img
+                src={selectedExpansion.image}
+                alt={selectedExpansion.name}
+                className="w-40 h-56 object-cover rounded-xl shadow-lg cursor-zoom-in transition-transform duration-200 hover:scale-105"
+                onClick={() => setExpansionImageDialogOpen(true)}
+                style={{ background: '#fff' }}
+              />
+            </div>
+          )}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-3xl font-bold text-white">
@@ -281,8 +295,13 @@ const Album = () => {
                       <img 
                         src={expansion.image} 
                         alt={expansion.name}
-                        className="w-full h-full object-cover object-center"
+                        className="w-full h-full object-cover object-center cursor-zoom-in transition-transform duration-200 hover:scale-110"
                         style={{ display: 'block' }}
+                        onClick={e => {
+                          e.stopPropagation();
+                          setSelectedExpansionImage(expansion);
+                          setExpansionImageDialogOpen(true);
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-white text-2xl">
@@ -321,6 +340,29 @@ const Album = () => {
             );
           })}
         </div>
+        {/* Dialog per immagine espansione */}
+        <Dialog open={expansionImageDialogOpen} onOpenChange={v => setExpansionImageDialogOpen(v)}>
+          <DialogContent className="max-w-xl">
+            {selectedExpansionImage && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{selectedExpansionImage.name}</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center">
+                  <div className="relative w-full max-w-md mb-4">
+                    <img
+                      src={selectedExpansionImage.image}
+                      alt={selectedExpansionImage.name}
+                      className="w-full rounded-lg shadow-lg"
+                      style={{ objectFit: 'contain', background: '#fff' }}
+                    />
+                  </div>
+                  <div className="text-center text-white/80 text-lg mb-2">{selectedExpansionImage.description}</div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Overall Stats */}
         <div className="mt-16">
