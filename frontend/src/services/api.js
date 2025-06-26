@@ -97,6 +97,14 @@ export const cardAPI = {
   getUserCards: async () => {
     const response = await api.get('/user/cards');
     return response.data;
+  },
+
+  reorder: async (expansionId, orderedIds) => {
+    const response = await api.post('/cards/reorder', {
+      expansion_id: expansionId,
+      ordered_ids: orderedIds
+    });
+    return response.data;
   }
 };
 

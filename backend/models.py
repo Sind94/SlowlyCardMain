@@ -58,12 +58,14 @@ class CardCreate(BaseModel):
     expansion_id: str
     image: str  # base64 encoded image
     holo: bool = False
+    order: Optional[int] = None  # Nuovo campo per ordinamento
 
 class CardUpdate(BaseModel):
     name: Optional[str] = None
     expansion_id: Optional[str] = None
     image: Optional[str] = None
     holo: Optional[bool] = None
+    order: Optional[int] = None  # Nuovo campo per ordinamento
 
 class Card(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -71,6 +73,7 @@ class Card(BaseModel):
     expansion_id: str
     image: str  # base64 encoded image
     holo: bool = False
+    order: Optional[int] = None  # Nuovo campo per ordinamento
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class OpenPackRequest(BaseModel):

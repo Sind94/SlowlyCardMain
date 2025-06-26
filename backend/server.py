@@ -10,6 +10,7 @@ from typing import List
 import random
 from datetime import timedelta
 import sys
+from fastapi import Body
 
 # Add current directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -205,7 +206,23 @@ async def get_cards(expansion_id: str = None, current_user: User = Depends(get_c
     else:
         if expansion_id:
             query["expansion_id"] = expansion_id
-    cards = await db.cards.find(query).to_list(1000)
+    cards = await db.cards.find(query).sort("order", 1).to_list(1000)
+    return [Card(**card) for card in cards]
+
+# Endpoint per aggiornare l'ordine delle carte di una espansione
+@api_router.post("/cards/reorder", response_model=List[Card])
+async def reorder_cards(
+    expansion_id: str = Body(...),
+    ordered_ids: List[str] = Body(...),
+    current_user: User = Depends(get_current_user)
+):
+    """Aggiorna l'ordine delle carte di una espansione (solo admin)."""
+    if not getattr(current_user, 'is_admin', False):
+        raise HTTPException(status_code=403, detail="Solo admin")
+    for idx, card_id in enumerate(ordered_ids):
+        await db.cards.update_one({"id": card_id, "expansion_id": expansion_id}, {"$set": {"order": idx}})
+    # Restituisci le carte ordinate
+    cards = await db.cards.find({"expansion_id": expansion_id}).sort("order", 1).to_list(1000)
     return [Card(**card) for card in cards]
 
 @api_router.post("/cards", response_model=Card)
