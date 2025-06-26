@@ -717,7 +717,26 @@ const Admin = () => {
                 <div className="bg-black/10 rounded-lg p-2">
                   <Accordion type="multiple" className="w-full">
                     {expansions.map((exp) => {
-                      const expCards = cards.filter(card => card.expansion_id === exp.id);
+                      const expCards = cards.filter(card => card.expansion_id === exp.id).sort((a, b) => {
+                        if (a.order != null && b.order != null) return a.order - b.order;
+                        if (a.order != null) return -1;
+                        if (b.order != null) return 1;
+                        return new Date(a.created_at) - new Date(b.created_at);
+                      });
+                      const moveCard = async (fromIdx, toIdx) => {
+                        if (toIdx < 0 || toIdx >= expCards.length) return;
+                        const newCards = [...expCards];
+                        const [moved] = newCards.splice(fromIdx, 1);
+                        newCards.splice(toIdx, 0, moved);
+                        // Aggiorna ordine locale
+                        setCards(prev => prev.map(card =>
+                          card.expansion_id === exp.id
+                            ? { ...card, order: newCards.findIndex(c => c.id === card.id) }
+                            : card
+                        ));
+                        // Persiste ordine backend
+                        await cardAPI.reorder(exp.id, newCards.map(c => c.id));
+                      };
                       return (
                         <AccordionItem key={exp.id} value={exp.id}>
                           <AccordionTrigger className="text-white text-base font-bold">
@@ -726,7 +745,7 @@ const Admin = () => {
                           </AccordionTrigger>
                           <AccordionContent>
                             <div className="space-y-2">
-                              {expCards.map((card) => (
+                              {expCards.map((card, idx) => (
                                 <div key={card.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
                                   <div className="flex-1">
                                     <span
@@ -750,7 +769,9 @@ const Admin = () => {
                                     </span>
                                     {card.holo && <Badge className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-purple-500 text-white">Holo</Badge>}
                                   </div>
-                                  <div className="flex space-x-2">
+                                  <div className="flex space-x-2 items-center">
+                                    <Button size="icon" variant="ghost" onClick={() => moveCard(idx, idx-1)} disabled={idx===0} title="Sposta su">▲</Button>
+                                    <Button size="icon" variant="ghost" onClick={() => moveCard(idx, idx+1)} disabled={idx===expCards.length-1} title="Sposta giù">▼</Button>
                                     <Button size="sm" variant="outline" onClick={() => { setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
                                     <Button size="sm" variant="destructive" onClick={() => deleteCard(card.id)} className="text-xs">Elimina</Button>
                                   </div>
@@ -767,7 +788,24 @@ const Admin = () => {
                 <div className="bg-black/10 rounded-lg p-2">
                   <Accordion type="multiple" className="w-full">
                     {expansions.map((exp) => {
-                      const expCards = cards.filter(card => card.expansion_id === exp.id);
+                      const expCards = cards.filter(card => card.expansion_id === exp.id).sort((a, b) => {
+                        if (a.order != null && b.order != null) return a.order - b.order;
+                        if (a.order != null) return -1;
+                        if (b.order != null) return 1;
+                        return new Date(a.created_at) - new Date(b.created_at);
+                      });
+                      const moveCard = async (fromIdx, toIdx) => {
+                        if (toIdx < 0 || toIdx >= expCards.length) return;
+                        const newCards = [...expCards];
+                        const [moved] = newCards.splice(fromIdx, 1);
+                        newCards.splice(toIdx, 0, moved);
+                        setCards(prev => prev.map(card =>
+                          card.expansion_id === exp.id
+                            ? { ...card, order: newCards.findIndex(c => c.id === card.id) }
+                            : card
+                        ));
+                        await cardAPI.reorder(exp.id, newCards.map(c => c.id));
+                      };
                       return (
                         <AccordionItem key={exp.id} value={exp.id}>
                           <AccordionTrigger className="text-white text-base font-bold">
@@ -776,7 +814,7 @@ const Admin = () => {
                           </AccordionTrigger>
                           <AccordionContent>
                             <div className="grid md:grid-cols-4 lg:grid-cols-6 gap-2">
-                              {expCards.map((card) => (
+                              {expCards.map((card, idx) => (
                                 <div key={card.id} className="bg-black/20 border-white/10 backdrop-blur-sm p-2 cursor-pointer rounded" onClick={() => setSelectedCardModal(card)}>
                                   <div className="flex flex-col items-center">
                                     <div className="aspect-[3/4] mb-1 rounded-lg overflow-hidden w-16 h-20 mx-auto">
@@ -785,7 +823,9 @@ const Admin = () => {
                                     <h3 className="text-white font-semibold text-xs mb-1 text-center truncate" title={card.name}>{card.name}</h3>
                                     <Badge className="text-xxs mb-1" style={{ backgroundColor: exp.color }}>{exp.name}</Badge>
                                     {card.holo && <Badge className="text-xxs bg-gradient-to-r from-blue-400 to-purple-500 text-white ml-1">Holo</Badge>}
-                                    <div className="flex justify-center mt-1">
+                                    <div className="flex justify-center mt-1 space-x-1">
+                                      <Button size="icon" variant="ghost" onClick={e => { e.stopPropagation(); moveCard(idx, idx-1); }} disabled={idx===0} title="Sposta su">▲</Button>
+                                      <Button size="icon" variant="ghost" onClick={e => { e.stopPropagation(); moveCard(idx, idx+1); }} disabled={idx===expCards.length-1} title="Sposta giù">▼</Button>
                                       <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
                                       <Button size="sm" variant="destructive" onClick={e => { e.stopPropagation(); deleteCard(card.id); }} className="text-xxs">Elimina</Button>
                                     </div>
