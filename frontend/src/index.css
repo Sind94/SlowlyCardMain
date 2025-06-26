@@ -111,6 +111,7 @@ button:focus, .btn:focus, [role="button"]:focus {
   position: absolute;
   inset: 0;
   z-index: 2;
+  overflow: hidden; /* Confinamento effetto holo */
   background:
     repeating-linear-gradient(120deg, rgba(255,255,255,0.13) 0 5%, rgba(255,255,255,0.00) 10% 20%),
     linear-gradient(120deg,
@@ -187,4 +188,12 @@ button:focus, .btn:focus, [role="button"]:focus {
   25% { opacity: 0.6; }
   50% { transform: translateX(100%) skewX(45deg); opacity: 0.2; }
   100% { transform: translateX(-100%) skewX(45deg); opacity: 0.2; }
+}
+
+/* Assicura che il contenitore dell'immagine grande nella modale abbia overflow nascosto e posizione relativa */
+.card-modal-img-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: #fff;
 }

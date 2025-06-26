@@ -654,7 +654,8 @@ const Admin = () => {
                     return (
                       <li key={card.id} className="flex items-center py-2">
                         <span
-                          className="text-white font-semibold text-sm cursor-pointer relative"
+                          className="text-white font-semibold text-sm cursor-pointer relative hover:underline"
+                          onClick={() => setSelectedCardModal(card)}
                           onMouseEnter={e => {
                             const preview = document.createElement('div');
                             preview.className = 'fixed z-50 p-1 bg-black/80 rounded border border-white/20';
@@ -789,7 +790,7 @@ const Admin = () => {
                   <DialogTitle>{selectedCardModal.name}</DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col items-center">
-                  <div className="relative w-full max-w-md mb-4">
+                  <div className="card-modal-img-container w-full max-w-md mb-4">
                     <img
                       src={selectedCardModal.image}
                       alt={selectedCardModal.name}
