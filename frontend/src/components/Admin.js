@@ -53,6 +53,9 @@ const Admin = () => {
   // ImgBB API Key
   const imgbbApiKey = 'b36c1113deca7e64893ad97457a8d2e6';
 
+  // Vista carte: griglia o elenco
+  const [cardsViewMode, setCardsViewMode] = useState('grid');
+
   // Funzione generica upload ImgBB
   const uploadToImgBB = async (file) => {
     const formData = new FormData();
@@ -324,8 +327,6 @@ const Admin = () => {
       });
     }
   };
-
-  const [cardsViewMode, setCardsViewMode] = useState('grid');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
