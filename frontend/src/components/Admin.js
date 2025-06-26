@@ -13,6 +13,7 @@ import { useToast } from '../hooks/use-toast';
 import { expansionAPI, cardAPI, adminAPI } from '../services/api';
 import MultipleCardsUpload from './MultipleCardsUpload';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion';
 
 const Admin = () => {
   const { user, logout, refreshUser } = useAuth();
@@ -648,39 +649,47 @@ const Admin = () => {
             </div>
             {cardsViewMode === 'list' ? (
               <div className="bg-black/10 rounded-lg p-2">
-                <ul className="divide-y divide-white/10">
-                  {cards.map((card) => {
-                    const expansion = expansions.find(e => e.id === card.expansion_id);
-                    return (
-                      <li key={card.id} className="flex items-center py-2">
-                        <span
-                          className="text-white font-semibold text-sm cursor-pointer relative hover:underline"
-                          onClick={() => setSelectedCardModal(card)}
-                          onMouseEnter={e => {
-                            const preview = document.createElement('div');
-                            preview.className = 'fixed z-50 p-1 bg-black/80 rounded border border-white/20';
-                            preview.style.left = `${e.clientX + 10}px`;
-                            preview.style.top = `${e.clientY - 20}px`;
-                            preview.innerHTML = `<img src='${card.image}' style='width:60px;height:80px;object-fit:cover;border-radius:4px;' />`;
-                            preview.id = `preview-${card.id}`;
-                            document.body.appendChild(preview);
-                          }}
-                          onMouseLeave={() => {
-                            const preview = document.getElementById(`preview-${card.id}`);
-                            if (preview) preview.remove();
-                          }}
-                        >
-                          {card.name}
-                        </span>
-                        <span className="ml-2 text-xs text-white/70">({expansion?.name})</span>
-                        {card.holo && <Badge className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-purple-500 text-white">Holo</Badge>}
-                        <div className="flex-1" />
-                        <Button size="sm" variant="outline" onClick={() => { setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
-                        <Button size="sm" variant="destructive" onClick={() => deleteCard(card.id)} className="text-xs">Elimina</Button>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <Accordion type="multiple" className="w-full">
+                  {expansions.map((exp) => (
+                    <AccordionItem key={exp.id} value={exp.id}>
+                      <AccordionTrigger className="text-white text-base font-bold">
+                        <span style={{ color: exp.color }}>{exp.name}</span>
+                        <span className="ml-2 text-xs text-white/70">{exp.total_cards} carte</span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <ul className="divide-y divide-white/10">
+                          {cards.filter(card => card.expansion_id === exp.id).map((card) => (
+                            <li key={card.id} className="flex items-center py-2">
+                              <span
+                                className="text-white font-semibold text-sm cursor-pointer relative hover:underline"
+                                onClick={() => setSelectedCardModal(card)}
+                                onMouseEnter={e => {
+                                  const preview = document.createElement('div');
+                                  preview.className = 'fixed z-50 p-1 bg-black/80 rounded border border-white/20';
+                                  preview.style.left = `${e.clientX + 10}px`;
+                                  preview.style.top = `${e.clientY - 20}px`;
+                                  preview.innerHTML = `<img src='${card.image}' style='width:60px;height:80px;object-fit:cover;border-radius:4px;' />`;
+                                  preview.id = `preview-${card.id}`;
+                                  document.body.appendChild(preview);
+                                }}
+                                onMouseLeave={() => {
+                                  const preview = document.getElementById(`preview-${card.id}`);
+                                  if (preview) preview.remove();
+                                }}
+                              >
+                                {card.name}
+                              </span>
+                              {card.holo && <Badge className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-purple-500 text-white">Holo</Badge>}
+                              <div className="flex-1" />
+                              <Button size="sm" variant="outline" onClick={() => { setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
+                              <Button size="sm" variant="destructive" onClick={() => deleteCard(card.id)} className="text-xs">Elimina</Button>
+                            </li>
+                          ))}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </div>
             ) : (
               <div className="grid md:grid-cols-4 lg:grid-cols-6 gap-2">
