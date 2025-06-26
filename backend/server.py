@@ -191,15 +191,20 @@ async def get_cards(expansion_id: str = None, current_user: User = Depends(get_c
     """Get all cards or cards from specific expansion. Solo carte di espansioni pubbliche per utenti normali."""
     user_is_admin = getattr(current_user, 'is_admin', False)
     query = {}
-    if expansion_id:
-        query["expansion_id"] = expansion_id
     if not user_is_admin:
         # Recupera solo carte di espansioni pubbliche
         public_expansions = await db.expansions.find({"published": True}).to_list(1000)
         public_ids = [exp["id"] for exp in public_expansions]
-        query["expansion_id"] = {"$in": public_ids} if not expansion_id else expansion_id if expansion_id in public_ids : None
-        if query["expansion_id"] is None:
-            return []
+        if expansion_id:
+            if expansion_id in public_ids:
+                query["expansion_id"] = expansion_id
+            else:
+                return []
+        else:
+            query["expansion_id"] = {"$in": public_ids}
+    else:
+        if expansion_id:
+            query["expansion_id"] = expansion_id
     cards = await db.cards.find(query).to_list(1000)
     return [Card(**card) for card in cards]
 
