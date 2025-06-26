@@ -74,6 +74,19 @@ const Album = () => {
   if (selectedExpansion) {
     const foundCards = getFoundCardsForExpansion(selectedExpansion.id);
     const allExpansionCards = cards.filter(card => card.expansion_id === selectedExpansion.id);
+    // Ordina le carte per 'order' crescente (se presente), altrimenti per 'created_at'
+    const allExpansionCardsSorted = [...allExpansionCards].sort((a, b) => {
+      if (a.order != null && b.order != null) {
+        return a.order - b.order;
+      } else if (a.order != null) {
+        return -1;
+      } else if (b.order != null) {
+        return 1;
+      } else {
+        // fallback: ordina per data di creazione
+        return new Date(a.created_at) - new Date(b.created_at);
+      }
+    });
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
@@ -124,7 +137,7 @@ const Album = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {allExpansionCards.map((card) => {
+            {allExpansionCardsSorted.map((card) => {
               const isFound = localUser?.found_cards?.includes(card.id);
               return (
                 <Card 
