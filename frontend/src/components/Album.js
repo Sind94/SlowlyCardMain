@@ -332,6 +332,32 @@ const Album = () => {
             );
           })}
         </div>
+        {/* Dialog per immagine espansione anche qui */}
+        <Dialog open={!!selectedExpansionImage} onOpenChange={v => {
+          if (!v) setSelectedExpansionImage(null);
+          setExpansionImageDialogOpen(v);
+        }}>
+          <DialogContent className="max-w-xl">
+            {selectedExpansionImage && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{selectedExpansionImage.name}</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center">
+                  <div className="relative w-full max-w-md mb-4">
+                    <img
+                      src={selectedExpansionImage.image}
+                      alt={selectedExpansionImage.name}
+                      className="w-full rounded-lg shadow-lg"
+                      style={{ objectFit: 'contain', background: '#fff' }}
+                    />
+                  </div>
+                  <div className="text-center text-white/80 text-lg mb-2">{selectedExpansionImage.description}</div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Overall Stats */}
         <div className="mt-16">
