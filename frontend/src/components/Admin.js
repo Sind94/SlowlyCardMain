@@ -758,35 +758,28 @@ const Admin = () => {
                           >
                             <SortableContext items={expCards.map(c => c.id)} strategy={verticalListSortingStrategy}>
                               <div className="space-y-2">
-                                {expCards.map((card) => {
-                                  const sortable = useSortable({ id: card.id });
-                                  return (
-                                    <SortableCardListItem
-                                      key={card.id}
-                                      card={card}
-                                      setNodeRef={sortable.setNodeRef}
-                                      style={{ transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition }}
-                                      listeners={sortable.listeners}
-                                      attributes={sortable.attributes}
-                                      onClick={setSelectedCardModal}
-                                      onEdit={(c) => { setEditingCard(c); setCardForm({ name: c.name, expansion_id: c.expansion_id, image: c.image, holo: c.holo || false }); }}
-                                      onDelete={deleteCard}
-                                      onMouseEnter={e => {
-                                        const preview = document.createElement('div');
-                                        preview.className = 'fixed z-50 p-1 bg-black/80 rounded border border-white/20';
-                                        preview.style.left = `${e.clientX + 10}px`;
-                                        preview.style.top = `${e.clientY - 20}px`;
-                                        preview.innerHTML = `<img src='${card.image}' style='width:60px;height:80px;object-fit:cover;border-radius:4px;' />`;
-                                        preview.id = `preview-${card.id}`;
-                                        document.body.appendChild(preview);
-                                      }}
-                                      onMouseLeave={() => {
-                                        const preview = document.getElementById(`preview-${card.id}`);
-                                        if (preview) preview.remove();
-                                      }}
-                                    />
-                                  );
-                                })}
+                                {expCards.map((card) => (
+                                  <SortableCardListItem
+                                    key={card.id}
+                                    card={card}
+                                    onClick={setSelectedCardModal}
+                                    onEdit={(c) => { setEditingCard(c); setCardForm({ name: c.name, expansion_id: c.expansion_id, image: c.image, holo: c.holo || false }); }}
+                                    onDelete={deleteCard}
+                                    onMouseEnter={e => {
+                                      const preview = document.createElement('div');
+                                      preview.className = 'fixed z-50 p-1 bg-black/80 rounded border border-white/20';
+                                      preview.style.left = `${e.clientX + 10}px`;
+                                      preview.style.top = `${e.clientY - 20}px`;
+                                      preview.innerHTML = `<img src='${card.image}' style='width:60px;height:80px;object-fit:cover;border-radius:4px;' />`;
+                                      preview.id = `preview-${card.id}`;
+                                      document.body.appendChild(preview);
+                                    }}
+                                    onMouseLeave={() => {
+                                      const preview = document.getElementById(`preview-${card.id}`);
+                                      if (preview) preview.remove();
+                                    }}
+                                  />
+                                ))}
                               </div>
                             </SortableContext>
                           </DndContext>
@@ -828,23 +821,16 @@ const Admin = () => {
                           >
                             <SortableContext items={expCards.map(c => c.id)} strategy={rectSortingStrategy}>
                               <div className="grid md:grid-cols-4 lg:grid-cols-6 gap-2">
-                                {expCards.map((card) => {
-                                  const sortable = useSortable({ id: card.id });
-                                  return (
-                                    <SortableCardGridItem
-                                      key={card.id}
-                                      card={card}
-                                      setNodeRef={sortable.setNodeRef}
-                                      style={{ transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition }}
-                                      listeners={sortable.listeners}
-                                      attributes={sortable.attributes}
-                                      expColor={exp.color}
-                                      expName={exp.name}
-                                      onEdit={(c) => { setEditingCard(c); setCardForm({ name: c.name, expansion_id: c.expansion_id, image: c.image, holo: c.holo || false }); }}
-                                      onDelete={deleteCard}
-                                    />
-                                  );
-                                })}
+                                {expCards.map((card) => (
+                                  <SortableCardGridItem
+                                    key={card.id}
+                                    card={card}
+                                    expColor={exp.color}
+                                    expName={exp.name}
+                                    onEdit={(c) => { setEditingCard(c); setCardForm({ name: c.name, expansion_id: c.expansion_id, image: c.image, holo: c.holo || false }); }}
+                                    onDelete={deleteCard}
+                                  />
+                                ))}
                               </div>
                             </SortableContext>
                           </DndContext>
@@ -962,42 +948,44 @@ const Admin = () => {
 };
 
 // SortableItem per lista (accordion)
-function SortableCardListItem({ card, listeners, attributes, setNodeRef, style, ...props }) {
+function SortableCardListItem({ card, onClick, onEdit, onDelete, onMouseEnter, onMouseLeave }) {
+  const { setNodeRef, attributes, listeners, transform, transition } = useSortable({ id: card.id });
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} {...props} className="flex items-center justify-between p-4 bg-white/5 rounded-lg cursor-grab">
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} {...attributes} {...listeners} className="flex items-center justify-between p-4 bg-white/5 rounded-lg cursor-grab">
       <div className="flex-1">
         <span
           className="text-white font-semibold text-sm cursor-pointer relative hover:underline"
-          onClick={() => props.onClick(card)}
-          onMouseEnter={props.onMouseEnter}
-          onMouseLeave={props.onMouseLeave}
+          onClick={() => onClick(card)}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
         >
           {card.name}
         </span>
         {card.holo && <Badge className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-purple-500 text-white">Holo</Badge>}
       </div>
       <div className="flex space-x-2">
-        <Button size="sm" variant="outline" onClick={() => props.onEdit(card)} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
-        <Button size="sm" variant="destructive" onClick={() => props.onDelete(card.id)} className="text-xs">Elimina</Button>
+        <Button size="sm" variant="outline" onClick={() => onEdit(card)} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
+        <Button size="sm" variant="destructive" onClick={() => onDelete(card.id)} className="text-xs">Elimina</Button>
       </div>
     </div>
   );
 }
 
 // SortableItem per griglia
-function SortableCardGridItem({ card, listeners, attributes, setNodeRef, style, ...props }) {
+function SortableCardGridItem({ card, expColor, expName, onEdit, onDelete }) {
+  const { setNodeRef, attributes, listeners, transform, transition } = useSortable({ id: card.id });
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} {...props} className="bg-black/20 border-white/10 backdrop-blur-sm p-2 cursor-grab rounded">
+    <div ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} {...attributes} {...listeners} className="bg-black/20 border-white/10 backdrop-blur-sm p-2 cursor-grab rounded">
       <div className="flex flex-col items-center">
         <div className="aspect-[3/4] mb-1 rounded-lg overflow-hidden w-16 h-20 mx-auto">
           <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
         </div>
         <h3 className="text-white font-semibold text-xs mb-1 text-center truncate" title={card.name}>{card.name}</h3>
-        <Badge className="text-xxs mb-1" style={{ backgroundColor: props.expColor }}>{props.expName}</Badge>
+        <Badge className="text-xxs mb-1" style={{ backgroundColor: expColor }}>{expName}</Badge>
         {card.holo && <Badge className="text-xxs bg-gradient-to-r from-blue-400 to-purple-500 text-white ml-1">Holo</Badge>}
         <div className="flex justify-center mt-1">
-          <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); props.onEdit(card); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
-          <Button size="sm" variant="destructive" onClick={e => { e.stopPropagation(); props.onDelete(card.id); }} className="text-xxs">Elimina</Button>
+          <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); onEdit(card); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
+          <Button size="sm" variant="destructive" onClick={e => { e.stopPropagation(); onDelete(card.id); }} className="text-xxs">Elimina</Button>
         </div>
       </div>
     </div>
