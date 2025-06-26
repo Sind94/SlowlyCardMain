@@ -57,7 +57,7 @@ const Admin = () => {
   const imgbbApiKey = 'b36c1113deca7e64893ad97457a8d2e6';
 
   // Vista carte: griglia o elenco
-  const [cardsViewMode, setCardsViewMode] = useState('grid');
+  const [cardsViewMode, setCardsViewMode] = useState('list');
 
   // Funzione generica upload ImgBB
   const uploadToImgBB = async (file) => {
