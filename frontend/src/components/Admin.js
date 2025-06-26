@@ -692,26 +692,37 @@ const Admin = () => {
                 </Accordion>
               </div>
             ) : (
-              <div className="grid md:grid-cols-4 lg:grid-cols-6 gap-2">
-                {cards.map((card) => {
-                  const expansion = expansions.find(e => e.id === card.expansion_id);
-                  return (
-                    <Card key={card.id} className="bg-black/20 border-white/10 backdrop-blur-sm p-2 cursor-pointer" onClick={() => setSelectedCardModal(card)}>
-                      <CardContent className="p-2">
-                        <div className="aspect-[3/4] mb-1 rounded-lg overflow-hidden w-16 h-20 mx-auto">
-                          <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
+              <div className="bg-black/10 rounded-lg p-2">
+                <Accordion type="multiple" className="w-full">
+                  {expansions.map((exp) => (
+                    <AccordionItem key={exp.id} value={exp.id}>
+                      <AccordionTrigger className="text-white text-base font-bold">
+                        <span style={{ color: exp.color }}>{exp.name}</span>
+                        <span className="ml-2 text-xs text-white/70">{exp.total_cards} carte</span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="grid md:grid-cols-4 lg:grid-cols-6 gap-2">
+                          {cards.filter(card => card.expansion_id === exp.id).map((card) => (
+                            <Card key={card.id} className="bg-black/20 border-white/10 backdrop-blur-sm p-2 cursor-pointer" onClick={() => setSelectedCardModal(card)}>
+                              <CardContent className="p-2">
+                                <div className="aspect-[3/4] mb-1 rounded-lg overflow-hidden w-16 h-20 mx-auto">
+                                  <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
+                                </div>
+                                <h3 className="text-white font-semibold text-xs mb-1 text-center truncate" title={card.name}>{card.name}</h3>
+                                <Badge className="text-xxs mb-1" style={{ backgroundColor: exp.color }}>{exp.name}</Badge>
+                                {card.holo && <Badge className="text-xxs bg-gradient-to-r from-blue-400 to-purple-500 text-white ml-1">Holo</Badge>}
+                                <div className="flex justify-center mt-1">
+                                  <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
+                                  <Button size="sm" variant="destructive" onClick={e => { e.stopPropagation(); deleteCard(card.id); }} className="text-xxs">Elimina</Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
                         </div>
-                        <h3 className="text-white font-semibold text-xs mb-1 text-center truncate" title={card.name}>{card.name}</h3>
-                        <Badge className="text-xxs mb-1" style={{ backgroundColor: expansion?.color }}>{expansion?.name}</Badge>
-                        {card.holo && <Badge className="text-xxs bg-gradient-to-r from-blue-400 to-purple-500 text-white ml-1">Holo</Badge>}
-                        <div className="flex justify-center mt-1">
-                          <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
-                          <Button size="sm" variant="destructive" onClick={e => { e.stopPropagation(); deleteCard(card.id); }} className="text-xxs">Elimina</Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </div>
             )}
           </TabsContent>
