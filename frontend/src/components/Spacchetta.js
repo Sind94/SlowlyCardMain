@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { expansionAPI, packAPI } from '../services/api';
 import { useToast } from '../hooks/use-toast';
 import AdminButton from './AdminButton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 const Spacchetta = () => {
   const { user, logout, refreshUser } = useAuth();
@@ -18,6 +19,7 @@ const Spacchetta = () => {
   const [openedCards, setOpenedCards] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedCardModal, setSelectedCardModal] = useState(null);
 
   // Aggiorna i dati utente dopo spacchettamento
   const refreshUserData = async () => {
@@ -99,11 +101,12 @@ const Spacchetta = () => {
 
   const CardRevealAnimation = ({ card, index }) => (
     <Card 
-      className="bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border-yellow-400/30 backdrop-blur-sm transform transition-all duration-500 hover:scale-105"
+      className="bg-gradient-to-br from-yellow-400/20 to-orange-500/20 border-yellow-400/30 backdrop-blur-sm transform transition-all duration-500 hover:scale-105 cursor-pointer"
       style={{ 
         animationDelay: `${index * 0.2}s`,
         animation: 'slideInUp 0.6s ease-out forwards'
       }}
+      onClick={() => setSelectedCardModal(card)}
     >
       <CardContent className="p-4">
         <div className="aspect-[3/4] mb-3 rounded-lg overflow-hidden relative">
@@ -198,19 +201,30 @@ const Spacchetta = () => {
             </Button>
           </div>
         </main>
-
-        <style jsx>{`
-          @keyframes slideInUp {
-            from {
-              opacity: 0;
-              transform: translateY(30px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}</style>
+        <Dialog open={!!selectedCardModal} onOpenChange={v => !v && setSelectedCardModal(null)}>
+          <DialogContent>
+            {selectedCardModal && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{selectedCardModal.name}</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center">
+                  <div className="relative w-full max-w-md mb-4">
+                    <img
+                      src={selectedCardModal.image}
+                      alt={selectedCardModal.name}
+                      className="w-full rounded-lg shadow-lg"
+                      style={{ objectFit: 'contain', background: '#fff' }}
+                    />
+                    {selectedCardModal.holo && (
+                      <div className="absolute inset-0 pointer-events-none holo-effect rounded-lg" />
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

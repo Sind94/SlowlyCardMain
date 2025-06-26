@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { expansionAPI, cardAPI, adminAPI } from '../services/api';
 import MultipleCardsUpload from './MultipleCardsUpload';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 const Admin = () => {
   const { user, logout, refreshUser } = useAuth();
@@ -39,6 +40,7 @@ const Admin = () => {
   });
   const [editingExpansion, setEditingExpansion] = useState(null);
   const [editingCard, setEditingCard] = useState(null);
+  const [selectedCardModal, setSelectedCardModal] = useState(null);
 
   // Check if user is admin
   const isAdmin = user?.is_admin;
@@ -684,7 +686,7 @@ const Admin = () => {
                 {cards.map((card) => {
                   const expansion = expansions.find(e => e.id === card.expansion_id);
                   return (
-                    <Card key={card.id} className="bg-black/20 border-white/10 backdrop-blur-sm p-2">
+                    <Card key={card.id} className="bg-black/20 border-white/10 backdrop-blur-sm p-2 cursor-pointer" onClick={() => setSelectedCardModal(card)}>
                       <CardContent className="p-2">
                         <div className="aspect-[3/4] mb-1 rounded-lg overflow-hidden w-16 h-20 mx-auto">
                           <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
@@ -693,8 +695,8 @@ const Admin = () => {
                         <Badge className="text-xxs mb-1" style={{ backgroundColor: expansion?.color }}>{expansion?.name}</Badge>
                         {card.holo && <Badge className="text-xxs bg-gradient-to-r from-blue-400 to-purple-500 text-white ml-1">Holo</Badge>}
                         <div className="flex justify-center mt-1">
-                          <Button size="sm" variant="outline" onClick={() => { setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
-                          <Button size="sm" variant="destructive" onClick={() => deleteCard(card.id)} className="text-xxs">Elimina</Button>
+                          <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
+                          <Button size="sm" variant="destructive" onClick={e => { e.stopPropagation(); deleteCard(card.id); }} className="text-xxs">Elimina</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -778,6 +780,31 @@ const Admin = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <Dialog open={!!selectedCardModal} onOpenChange={v => !v && setSelectedCardModal(null)}>
+          <DialogContent>
+            {selectedCardModal && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{selectedCardModal.name}</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center">
+                  <div className="relative w-full max-w-md mb-4">
+                    <img
+                      src={selectedCardModal.image}
+                      alt={selectedCardModal.name}
+                      className="w-full rounded-lg shadow-lg"
+                      style={{ objectFit: 'contain', background: '#fff' }}
+                    />
+                    {selectedCardModal.holo && (
+                      <div className="absolute inset-0 pointer-events-none holo-effect rounded-lg" />
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
