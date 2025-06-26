@@ -20,6 +20,8 @@ const Spacchetta = () => {
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedCardModal, setSelectedCardModal] = useState(null);
+  const [selectedExpansionImage, setSelectedExpansionImage] = useState(null);
+  const [expansionImageDialogOpen, setExpansionImageDialogOpen] = useState(false);
 
   // Aggiorna i dati utente dopo spacchettamento
   const refreshUserData = async () => {
@@ -410,8 +412,13 @@ const Spacchetta = () => {
                       <img 
                         src={expansion.image} 
                         alt={expansion.name}
-                        className="w-full h-full object-cover object-center"
+                        className="w-full h-full object-cover object-center cursor-zoom-in transition-transform duration-200 hover:scale-110"
                         style={{ display: 'block' }}
+                        onClick={e => {
+                          e.stopPropagation();
+                          setSelectedExpansionImage(expansion);
+                          setExpansionImageDialogOpen(true);
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-white text-4xl">
@@ -448,6 +455,33 @@ const Spacchetta = () => {
             ))}
           </div>
         )}
+
+        {/* Dialog per immagine espansione anche qui */}
+        <Dialog open={!!selectedExpansionImage} onOpenChange={v => {
+          if (!v) setSelectedExpansionImage(null);
+          setExpansionImageDialogOpen(v);
+        }}>
+          <DialogContent className="max-w-xl">
+            {selectedExpansionImage && (
+              <>
+                <DialogHeader>
+                  <DialogTitle>{selectedExpansionImage.name}</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center">
+                  <div className="relative w-full max-w-md mb-4">
+                    <img
+                      src={selectedExpansionImage.image}
+                      alt={selectedExpansionImage.name}
+                      className="w-full rounded-lg shadow-lg"
+                      style={{ objectFit: 'contain', background: '#fff' }}
+                    />
+                  </div>
+                  <div className="text-center text-white/80 text-lg mb-2">{selectedExpansionImage.description}</div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Info Section */}
         <div className="mt-16">
