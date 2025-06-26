@@ -14,7 +14,21 @@ import { expansionAPI, cardAPI, adminAPI } from '../services/api';
 import MultipleCardsUpload from './MultipleCardsUpload';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  rectSortingStrategy
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const Admin = () => {
   const { user, logout, refreshUser } = useAuth();
@@ -333,6 +347,11 @@ const Admin = () => {
       });
     }
   };
+
+  // SENSORS per dnd-kit
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
@@ -708,152 +727,131 @@ const Admin = () => {
             {cardsViewMode === 'list' ? (
               <div className="bg-black/10 rounded-lg p-2">
                 <Accordion type="multiple" className="w-full">
-                  {expansions.map((exp) => (
-                    <AccordionItem key={exp.id} value={exp.id}>
-                      <AccordionTrigger className="text-white text-base font-bold">
-                        <span style={{ color: exp.color }}>{exp.name}</span>
-                        <span className="ml-2 text-xs text-white/70">{exp.total_cards} carte</span>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <DragDropContext
-                          onDragEnd={async (result) => {
-                            if (!result.destination) return;
-                            const expCards = cards.filter(card => card.expansion_id === exp.id);
-                            const sourceIdx = result.source.index;
-                            const destIdx = result.destination.index;
-                            const reordered = Array.from(expCards);
-                            const [removed] = reordered.splice(sourceIdx, 1);
-                            reordered.splice(destIdx, 0, removed);
-                            // Aggiorna l'ordine locale
-                            const newCards = cards.map(card =>
-                              card.expansion_id === exp.id
-                                ? reordered.find(c => c.id === card.id) || card
-                                : card
-                            );
-                            setCards(newCards);
-                            // Salva ordine su backend
-                            await cardAPI.reorder(exp.id, reordered.map(c => c.id));
-                          }}
-                        >
-                          <Droppable droppableId={exp.id}>
-                            {(provided) => (
-                              <ul className="divide-y divide-white/10" ref={provided.innerRef} {...provided.droppableProps}>
-                                {cards.filter(card => card.expansion_id === exp.id).map((card, idx) => (
-                                  <Draggable key={card.id} draggableId={card.id} index={idx}>
-                                    {(provided, snapshot) => (
-                                      <li
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className={`flex items-center py-2 ${snapshot.isDragging ? 'bg-white/10' : ''}`}
-                                      >
-                                        <span className="mr-2 cursor-grab text-white/50" title="Trascina per riordinare">≡</span>
-                                        <span
-                                          className="text-white font-semibold text-sm cursor-pointer relative hover:underline"
-                                          onClick={() => setSelectedCardModal(card)}
-                                          onMouseEnter={e => {
-                                            const preview = document.createElement('div');
-                                            preview.className = 'fixed z-50 p-1 bg-black/80 rounded border border-white/20';
-                                            preview.style.left = `${e.clientX + 10}px`;
-                                            preview.style.top = `${e.clientY - 20}px`;
-                                            preview.innerHTML = `<img src='${card.image}' style='width:60px;height:80px;object-fit:cover;border-radius:4px;' />`;
-                                            preview.id = `preview-${card.id}`;
-                                            document.body.appendChild(preview);
-                                          }}
-                                          onMouseLeave={() => {
-                                            const preview = document.getElementById(`preview-${card.id}`);
-                                            if (preview) preview.remove();
-                                          }}
-                                        >
-                                          {card.name}
-                                        </span>
-                                        {card.holo && <Badge className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-purple-500 text-white">Holo</Badge>}
-                                        <div className="flex-1" />
-                                        <Button size="sm" variant="outline" onClick={() => { setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
-                                        <Button size="sm" variant="destructive" onClick={() => deleteCard(card.id)} className="text-xs">Elimina</Button>
-                                      </li>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
-                              </ul>
-                            )}
-                          </Droppable>
-                        </DragDropContext>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
+                  {expansions.map((exp) => {
+                    const expCards = cards.filter(card => card.expansion_id === exp.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+                    return (
+                      <AccordionItem key={exp.id} value={exp.id}>
+                        <AccordionTrigger className="text-white text-base font-bold">
+                          <span style={{ color: exp.color }}>{exp.name}</span>
+                          <span className="ml-2 text-xs text-white/70">{exp.total_cards} carte</span>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={async (event) => {
+                              const { active, over } = event;
+                              if (!over || active.id === over.id) return;
+                              const oldIndex = expCards.findIndex(c => c.id === active.id);
+                              const newIndex = expCards.findIndex(c => c.id === over.id);
+                              if (oldIndex === -1 || newIndex === -1) return;
+                              const newCards = arrayMove(expCards, oldIndex, newIndex);
+                              // Aggiorna ordine locale
+                              setCards(prev => prev.map(card =>
+                                card.expansion_id === exp.id
+                                  ? { ...card, order: newCards.findIndex(c => c.id === card.id) }
+                                  : card
+                              ));
+                              // Persiste ordine backend
+                              await cardAPI.reorder(exp.id, newCards.map(c => c.id));
+                            }}
+                          >
+                            <SortableContext items={expCards.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                              <div className="space-y-2">
+                                {expCards.map((card) => {
+                                  const sortable = useSortable({ id: card.id });
+                                  return (
+                                    <SortableCardListItem
+                                      key={card.id}
+                                      card={card}
+                                      setNodeRef={sortable.setNodeRef}
+                                      style={{ transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition }}
+                                      listeners={sortable.listeners}
+                                      attributes={sortable.attributes}
+                                      onClick={setSelectedCardModal}
+                                      onEdit={(c) => { setEditingCard(c); setCardForm({ name: c.name, expansion_id: c.expansion_id, image: c.image, holo: c.holo || false }); }}
+                                      onDelete={deleteCard}
+                                      onMouseEnter={e => {
+                                        const preview = document.createElement('div');
+                                        preview.className = 'fixed z-50 p-1 bg-black/80 rounded border border-white/20';
+                                        preview.style.left = `${e.clientX + 10}px`;
+                                        preview.style.top = `${e.clientY - 20}px`;
+                                        preview.innerHTML = `<img src='${card.image}' style='width:60px;height:80px;object-fit:cover;border-radius:4px;' />`;
+                                        preview.id = `preview-${card.id}`;
+                                        document.body.appendChild(preview);
+                                      }}
+                                      onMouseLeave={() => {
+                                        const preview = document.getElementById(`preview-${card.id}`);
+                                        if (preview) preview.remove();
+                                      }}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </SortableContext>
+                          </DndContext>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
                 </Accordion>
               </div>
             ) : (
               <div className="bg-black/10 rounded-lg p-2">
                 <Accordion type="multiple" className="w-full">
-                  {expansions.map((exp) => (
-                    <AccordionItem key={exp.id} value={exp.id}>
-                      <AccordionTrigger className="text-white text-base font-bold">
-                        <span style={{ color: exp.color }}>{exp.name}</span>
-                        <span className="ml-2 text-xs text-white/70">{exp.total_cards} carte</span>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <DragDropContext
-                          onDragEnd={async (result) => {
-                            if (!result.destination) return;
-                            const expCards = cards.filter(card => card.expansion_id === exp.id);
-                            const sourceIdx = result.source.index;
-                            const destIdx = result.destination.index;
-                            const reordered = Array.from(expCards);
-                            const [removed] = reordered.splice(sourceIdx, 1);
-                            reordered.splice(destIdx, 0, removed);
-                            // Aggiorna l'ordine locale
-                            const newCards = cards.map(card =>
-                              card.expansion_id === exp.id
-                                ? reordered.find(c => c.id === card.id) || card
-                                : card
-                            );
-                            setCards(newCards);
-                            // Salva ordine su backend
-                            await cardAPI.reorder(exp.id, reordered.map(c => c.id));
-                          }}
-                        >
-                          <Droppable droppableId={exp.id} direction="horizontal">
-                            {(provided) => (
-                              <div className="grid md:grid-cols-4 lg:grid-cols-6 gap-2" ref={provided.innerRef} {...provided.droppableProps}>
-                                {cards.filter(card => card.expansion_id === exp.id).map((card, idx) => (
-                                  <Draggable key={card.id} draggableId={card.id} index={idx}>
-                                    {(provided, snapshot) => (
-                                      <div
-                                        ref={provided.innerRef}
-                                        {...provided.draggableProps}
-                                        {...provided.dragHandleProps}
-                                        className={`bg-black/20 border-white/10 backdrop-blur-sm p-2 cursor-pointer rounded ${snapshot.isDragging ? 'ring-2 ring-blue-400' : ''}`}
-                                        onClick={() => setSelectedCardModal(card)}
-                                        style={{ ...provided.draggableProps.style, userSelect: 'none' }}
-                                      >
-                                        <div className="flex flex-col items-center">
-                                          <span className="mb-1 cursor-grab text-white/50" title="Trascina per riordinare">≡</span>
-                                          <div className="aspect-[3/4] mb-1 rounded-lg overflow-hidden w-16 h-20 mx-auto">
-                                            <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
-                                          </div>
-                                          <h3 className="text-white font-semibold text-xs mb-1 text-center truncate" title={card.name}>{card.name}</h3>
-                                          <Badge className="text-xxs mb-1" style={{ backgroundColor: exp.color }}>{exp.name}</Badge>
-                                          {card.holo && <Badge className="text-xxs bg-gradient-to-r from-blue-400 to-purple-500 text-white ml-1">Holo</Badge>}
-                                          <div className="flex justify-center mt-1">
-                                            <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
-                                            <Button size="sm" variant="destructive" onClick={e => { e.stopPropagation(); deleteCard(card.id); }} className="text-xxs">Elimina</Button>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                ))}
-                                {provided.placeholder}
+                  {expansions.map((exp) => {
+                    const expCards = cards.filter(card => card.expansion_id === exp.id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+                    return (
+                      <AccordionItem key={exp.id} value={exp.id}>
+                        <AccordionTrigger className="text-white text-base font-bold">
+                          <span style={{ color: exp.color }}>{exp.name}</span>
+                          <span className="ml-2 text-xs text-white/70">{exp.total_cards} carte</span>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={async (event) => {
+                              const { active, over } = event;
+                              if (!over || active.id === over.id) return;
+                              const oldIndex = expCards.findIndex(c => c.id === active.id);
+                              const newIndex = expCards.findIndex(c => c.id === over.id);
+                              if (oldIndex === -1 || newIndex === -1) return;
+                              const newCards = arrayMove(expCards, oldIndex, newIndex);
+                              setCards(prev => prev.map(card =>
+                                card.expansion_id === exp.id
+                                  ? { ...card, order: newCards.findIndex(c => c.id === card.id) }
+                                  : card
+                              ));
+                              await cardAPI.reorder(exp.id, newCards.map(c => c.id));
+                            }}
+                          >
+                            <SortableContext items={expCards.map(c => c.id)} strategy={rectSortingStrategy}>
+                              <div className="grid md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                {expCards.map((card) => {
+                                  const sortable = useSortable({ id: card.id });
+                                  return (
+                                    <SortableCardGridItem
+                                      key={card.id}
+                                      card={card}
+                                      setNodeRef={sortable.setNodeRef}
+                                      style={{ transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition }}
+                                      listeners={sortable.listeners}
+                                      attributes={sortable.attributes}
+                                      expColor={exp.color}
+                                      expName={exp.name}
+                                      onEdit={(c) => { setEditingCard(c); setCardForm({ name: c.name, expansion_id: c.expansion_id, image: c.image, holo: c.holo || false }); }}
+                                      onDelete={deleteCard}
+                                    />
+                                  );
+                                })}
                               </div>
-                            )}
-                          </Droppable>
-                        </DragDropContext>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
+                            </SortableContext>
+                          </DndContext>
+                        </AccordionContent>
+                      </AccordionItem>
+                    );
+                  })}
                 </Accordion>
               </div>
             )}
@@ -962,5 +960,48 @@ const Admin = () => {
     </div>
   );
 };
+
+// SortableItem per lista (accordion)
+function SortableCardListItem({ card, listeners, attributes, setNodeRef, style, ...props }) {
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} {...props} className="flex items-center justify-between p-4 bg-white/5 rounded-lg cursor-grab">
+      <div className="flex-1">
+        <span
+          className="text-white font-semibold text-sm cursor-pointer relative hover:underline"
+          onClick={() => props.onClick(card)}
+          onMouseEnter={props.onMouseEnter}
+          onMouseLeave={props.onMouseLeave}
+        >
+          {card.name}
+        </span>
+        {card.holo && <Badge className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-purple-500 text-white">Holo</Badge>}
+      </div>
+      <div className="flex space-x-2">
+        <Button size="sm" variant="outline" onClick={() => props.onEdit(card)} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
+        <Button size="sm" variant="destructive" onClick={() => props.onDelete(card.id)} className="text-xs">Elimina</Button>
+      </div>
+    </div>
+  );
+}
+
+// SortableItem per griglia
+function SortableCardGridItem({ card, listeners, attributes, setNodeRef, style, ...props }) {
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} {...props} className="bg-black/20 border-white/10 backdrop-blur-sm p-2 cursor-grab rounded">
+      <div className="flex flex-col items-center">
+        <div className="aspect-[3/4] mb-1 rounded-lg overflow-hidden w-16 h-20 mx-auto">
+          <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
+        </div>
+        <h3 className="text-white font-semibold text-xs mb-1 text-center truncate" title={card.name}>{card.name}</h3>
+        <Badge className="text-xxs mb-1" style={{ backgroundColor: props.expColor }}>{props.expName}</Badge>
+        {card.holo && <Badge className="text-xxs bg-gradient-to-r from-blue-400 to-purple-500 text-white ml-1">Holo</Badge>}
+        <div className="flex justify-center mt-1">
+          <Button size="sm" variant="outline" onClick={e => { e.stopPropagation(); props.onEdit(card); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
+          <Button size="sm" variant="destructive" onClick={e => { e.stopPropagation(); props.onDelete(card.id); }} className="text-xxs">Elimina</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default Admin;
