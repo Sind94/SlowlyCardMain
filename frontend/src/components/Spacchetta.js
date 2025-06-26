@@ -181,9 +181,10 @@ const Spacchetta = () => {
 
           <div className="text-center space-y-4">
             <Button 
-              onClick={() => {
-                setShowResults(false);
+              onClick={async () => {
                 setOpenedCards([]);
+                setShowResults(false);
+                await handleOpenPack(); // Apri subito un altro pacchetto senza tornare alla selezione
               }}
               className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white mr-4"
             >
