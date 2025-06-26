@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 import { expansionAPI, cardAPI, adminAPI } from '../services/api';
+import MultipleCardsUpload from './MultipleCardsUpload';
 
 const Admin = () => {
   const { user, logout, refreshUser } = useAuth();
@@ -511,91 +512,125 @@ const Admin = () => {
 
           {/* Cards Tab */}
           <TabsContent value="cards" className="space-y-6">
-            <Card className="bg-black/20 border-white/10 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white">
-                  {editingCard ? 'Modifica Carta' : 'Nuova Carta'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleCardSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="card-name" className="text-white">Nome</Label>
-                    <Input
-                      id="card-name"
-                      value={cardForm.name}
-                      onChange={(e) => setCardForm({...cardForm, name: e.target.value})}
-                      placeholder="Nome della carta"
-                      required
-                      className="bg-white/10 border-white/20 text-white"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="card-expansion" className="text-white">Espansione</Label>
-                    <Select value={cardForm.expansion_id} onValueChange={(value) => setCardForm({...cardForm, expansion_id: value})}>
-                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                        <SelectValue placeholder="Seleziona espansione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {expansions.map((expansion) => (
-                          <SelectItem key={expansion.id} value={expansion.id}>
-                            {expansion.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="card-image" className="text-white">Immagine</Label>
-                    <Input
-                      id="card-image"
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png"
-                      onChange={handleCardImageUpload}
-                      className="bg-white/10 border-white/20 text-white"
-                    />
-                    {cardForm.image && (
-                      <div className="mt-2">
-                        <img src={cardForm.image} alt="Preview" className="w-24 h-32 object-cover rounded" />
+            <Tabs defaultValue="single" className="space-y-4">
+              <TabsList className="w-full bg-black/10 mb-4">
+                <TabsTrigger value="single" className="text-white">Carta Singola</TabsTrigger>
+                <TabsTrigger value="multiple" className="text-white">Molteplici Carte</TabsTrigger>
+              </TabsList>
+              {/* Tab: Carta Singola */}
+              <TabsContent value="single">
+                <Card className="bg-black/20 border-white/10 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-white">
+                      {editingCard ? 'Modifica Carta' : 'Nuova Carta'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleCardSubmit} className="space-y-4">
+                      <div>
+                        <Label htmlFor="card-name" className="text-white">Nome</Label>
+                        <Input
+                          id="card-name"
+                          value={cardForm.name}
+                          onChange={(e) => setCardForm({...cardForm, name: e.target.value})}
+                          placeholder="Nome della carta"
+                          required
+                          className="bg-white/10 border-white/20 text-white"
+                        />
                       </div>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="card-holo" className="text-white flex items-center space-x-2">
-                      <input
-                        id="card-holo"
-                        type="checkbox"
-                        checked={cardForm.holo}
-                        onChange={e => setCardForm({ ...cardForm, holo: e.target.checked })}
-                        className="mr-2"
-                      />
-                      <span>Olografica</span>
-                    </Label>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button type="submit" className="bg-gradient-to-r from-blue-500 to-purple-600" disabled={cardImageUploading || !cardForm.image}>
-                      {editingCard ? 'Aggiorna' : 'Crea'} Carta
-                    </Button>
-                    {editingCard && (
-                      <Button 
-                        type="button" 
-                        variant="outline"
-                        onClick={() => {
-                          setEditingCard(null);
-                          setCardForm({ name: '', expansion_id: '', image: '' });
-                        }}
-                        className="border-white/30 text-white hover:bg-white/10"
-                      >
-                        Annulla
-                      </Button>
-                    )}
-                  </div>
-                  {cardImageUploading && <span className="text-xs text-white ml-2">Caricamento immagine...</span>}
-                  {cardImageError && <span className="text-xs text-red-400 ml-2">{cardImageError}</span>}
-                  {cardForm.image && <span className="text-xs text-green-400 ml-2">URL: {cardForm.image}</span>}
-                </form>
-              </CardContent>
-            </Card>
+                      <div>
+                        <Label htmlFor="card-expansion" className="text-white">Espansione</Label>
+                        <Select value={cardForm.expansion_id} onValueChange={(value) => setCardForm({...cardForm, expansion_id: value})}>
+                          <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                            <SelectValue placeholder="Seleziona espansione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {expansions.map((expansion) => (
+                              <SelectItem key={expansion.id} value={expansion.id}>
+                                {expansion.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="card-image" className="text-white">Immagine</Label>
+                        <Input
+                          id="card-image"
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png"
+                          onChange={handleCardImageUpload}
+                          className="bg-white/10 border-white/20 text-white"
+                        />
+                        {cardForm.image && (
+                          <div className="mt-2">
+                            <img src={cardForm.image} alt="Preview" className="w-24 h-32 object-cover rounded" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="card-holo" className="text-white flex items-center space-x-2">
+                          <input
+                            id="card-holo"
+                            type="checkbox"
+                            checked={cardForm.holo}
+                            onChange={e => setCardForm({ ...cardForm, holo: e.target.checked })}
+                            className="mr-2"
+                          />
+                          <span>Olografica</span>
+                        </Label>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button type="submit" className="bg-gradient-to-r from-blue-500 to-purple-600" disabled={cardImageUploading || !cardForm.image}>
+                          {editingCard ? 'Aggiorna' : 'Crea'} Carta
+                        </Button>
+                        {editingCard && (
+                          <Button 
+                            type="button" 
+                            variant="outline"
+                            onClick={() => {
+                              setEditingCard(null);
+                              setCardForm({ name: '', expansion_id: '', image: '' });
+                            }}
+                            className="border-white/30 text-white hover:bg-white/10"
+                          >
+                            Annulla
+                          </Button>
+                        )}
+                      </div>
+                      {cardImageUploading && <span className="text-xs text-white ml-2">Caricamento immagine...</span>}
+                      {cardImageError && <span className="text-xs text-red-400 ml-2">{cardImageError}</span>}
+                      {cardForm.image && <span className="text-xs text-green-400 ml-2">URL: {cardForm.image}</span>}
+                    </form>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              {/* Tab: Molteplici Carte */}
+              <TabsContent value="multiple">
+                <Card className="bg-black/20 border-white/10 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-white">Carica Più Carte</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MultipleCardsUpload
+                      expansions={expansions}
+                      onCardsCreated={(newCards) => {
+                        setCards([...cards, ...newCards]);
+                        // Aggiorna il conteggio carte nelle espansioni
+                        const updatedExpansions = [...expansions];
+                        newCards.forEach(card => {
+                          const idx = updatedExpansions.findIndex(e => e.id === card.expansion_id);
+                          if (idx !== -1) updatedExpansions[idx].total_cards += 1;
+                        });
+                        setExpansions(updatedExpansions);
+                      }}
+                      uploadToImgBB={uploadToImgBB}
+                      toast={toast}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {cards.map((card) => {
