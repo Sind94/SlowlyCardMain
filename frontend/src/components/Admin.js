@@ -467,55 +467,100 @@ const Admin = () => {
               </CardContent>
             </Card>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {expansions.map((expansion) => (
-                <Card key={expansion.id} className="bg-black/20 border-white/10 backdrop-blur-sm">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-white">{expansion.name}</CardTitle>
-                        <CardDescription className="text-white/70">{expansion.description}</CardDescription>
-                      </div>
-                      {expansion.image ? (
-                        <img src={expansion.image} alt={expansion.name} className="w-24 h-32 object-cover rounded-lg border border-white/20" />
-                      ) : (
-                        <Badge style={{ backgroundColor: expansion.color }} className="text-white">
-                          {expansion.total_cards} carte
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditingExpansion(expansion);
-                          setExpansionForm({
-                            name: expansion.name,
-                            description: expansion.description,
-                            color: expansion.color,
-                            image: expansion.image || '',
-                            published: expansion.published ?? false
-                          });
-                        }}
-                        className="border-white/30 text-white hover:bg-white/10"
-                      >
-                        Modifica
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => deleteExpansion(expansion.id)}
-                      >
-                        Elimina
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="flex justify-end mb-2">
+              <Button
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10 text-xs mr-2"
+                onClick={() => setExpansionsViewMode(expansionsViewMode === 'grid' ? 'list' : 'grid')}
+              >
+                {expansionsViewMode === 'grid' ? 'Vista Elenco' : 'Vista Griglia'}
+              </Button>
             </div>
+            {expansionsViewMode === 'list' ? (
+              <div className="bg-black/10 rounded-lg p-2">
+                <ul className="divide-y divide-white/10">
+                  {expansions.map((expansion) => (
+                    <li key={expansion.id} className="flex items-center py-2">
+                      <span
+                        className="text-white font-semibold text-sm relative"
+                        style={{ color: expansion.color }}
+                        onMouseEnter={e => {
+                          if (!expansion.image) return;
+                          const preview = document.createElement('div');
+                          preview.className = 'fixed z-50 p-1 bg-black/80 rounded border border-white/20';
+                          preview.style.left = `${e.clientX + 10}px`;
+                          preview.style.top = `${e.clientY - 20}px`;
+                          preview.innerHTML = `<img src='${expansion.image}' style='width:60px;height:80px;object-fit:cover;border-radius:4px;' />`;
+                          preview.id = `exp-preview-${expansion.id}`;
+                          document.body.appendChild(preview);
+                        }}
+                        onMouseLeave={() => {
+                          const preview = document.getElementById(`exp-preview-${expansion.id}`);
+                          if (preview) preview.remove();
+                        }}
+                      >
+                        {expansion.name}
+                      </span>
+                      <span className="ml-2 text-xs text-white/70">{expansion.description}</span>
+                      <Badge className="ml-2 text-xs" style={{ backgroundColor: expansion.color }}>{expansion.total_cards} carte</Badge>
+                      <div className="flex-1" />
+                      <Button size="sm" variant="outline" onClick={() => { setEditingExpansion(expansion); setExpansionForm({ name: expansion.name, description: expansion.description, color: expansion.color, image: expansion.image || '', published: expansion.published ?? false }); }} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
+                      <Button size="sm" variant="destructive" onClick={() => deleteExpansion(expansion.id)} className="text-xs">Elimina</Button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {expansions.map((expansion) => (
+                  <Card key={expansion.id} className="bg-black/20 border-white/10 backdrop-blur-sm">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-white">{expansion.name}</CardTitle>
+                          <CardDescription className="text-white/70">{expansion.description}</CardDescription>
+                        </div>
+                        {expansion.image ? (
+                          <img src={expansion.image} alt={expansion.name} className="w-24 h-32 object-cover rounded-lg border border-white/20" />
+                        ) : (
+                          <Badge style={{ backgroundColor: expansion.color }} className="text-white">
+                            {expansion.total_cards} carte
+                          </Badge>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingExpansion(expansion);
+                            setExpansionForm({
+                              name: expansion.name,
+                              description: expansion.description,
+                              color: expansion.color,
+                              image: expansion.image || '',
+                              published: expansion.published ?? false
+                            });
+                          }}
+                          className="border-white/30 text-white hover:bg-white/10"
+                        >
+                          Modifica
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteExpansion(expansion.id)}
+                        >
+                          Elimina
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Cards Tab */}
