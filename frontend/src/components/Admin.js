@@ -503,6 +503,11 @@ const Admin = () => {
                       </span>
                       <span className="ml-2 text-xs text-white/70">{expansion.description}</span>
                       <Badge className="ml-2 text-xs" style={{ backgroundColor: expansion.color }}>{expansion.total_cards} carte</Badge>
+                      {expansion.published ? (
+                        <Badge className="ml-2 text-xs bg-green-600 text-white">Pubblica</Badge>
+                      ) : (
+                        <Badge className="ml-2 text-xs bg-red-600 text-white">Privata</Badge>
+                      )}
                       <div className="flex-1" />
                       <Button size="sm" variant="outline" onClick={() => { setEditingExpansion(expansion); setExpansionForm({ name: expansion.name, description: expansion.description, color: expansion.color, image: expansion.image || '', published: expansion.published ?? false }); }} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
                       <Button size="sm" variant="destructive" onClick={() => deleteExpansion(expansion.id)} className="text-xs">Elimina</Button>
@@ -555,6 +560,11 @@ const Admin = () => {
                         >
                           Elimina
                         </Button>
+                        {expansion.published ? (
+                          <Badge className="ml-2 text-xs bg-green-600 text-white">Pubblica</Badge>
+                        ) : (
+                          <Badge className="ml-2 text-xs bg-red-600 text-white">Privata</Badge>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
