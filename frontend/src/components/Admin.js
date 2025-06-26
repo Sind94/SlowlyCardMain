@@ -325,6 +325,8 @@ const Admin = () => {
     }
   };
 
+  const [cardsViewMode, setCardsViewMode] = useState('grid');
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
       <header className="bg-black/20 backdrop-blur-md border-b border-white/10">
@@ -632,53 +634,73 @@ const Admin = () => {
               </TabsContent>
             </Tabs>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {cards.map((card) => {
-                const expansion = expansions.find(e => e.id === card.expansion_id);
-                return (
-                  <Card key={card.id} className="bg-black/20 border-white/10 backdrop-blur-sm">
-                    <CardContent className="p-4">
-                      <div className="aspect-[3/4] mb-3 rounded-lg overflow-hidden">
-                        <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
-                      </div>
-                      <h3 className="text-white font-semibold text-sm mb-2">{card.name}</h3>
-                      <Badge 
-                        className="text-xs mb-3"
-                        style={{ backgroundColor: expansion?.color }}
-                      >
-                        {expansion?.name}
-                      </Badge>
-                      <div className="flex space-x-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditingCard(card);
-                            setCardForm({
-                              name: card.name,
-                              expansion_id: card.expansion_id,
-                              image: card.image,
-                              holo: card.holo || false
-                            });
-                          }}
-                          className="border-white/30 text-white hover:bg-white/10 text-xs"
-                        >
-                          Modifica
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => deleteCard(card.id)}
-                          className="text-xs"
-                        >
-                          Elimina
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+            <div className="flex justify-end mb-2">
+              <Button
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10 text-xs mr-2"
+                onClick={() => setCardsViewMode(cardsViewMode === 'grid' ? 'list' : 'grid')}
+              >
+                {cardsViewMode === 'grid' ? 'Vista Elenco' : 'Vista Tabella'}
+              </Button>
             </div>
+            {cardsViewMode === 'list' ? (
+              <div className="bg-black/10 rounded-lg p-2">
+                <ul className="divide-y divide-white/10">
+                  {cards.map((card) => {
+                    const expansion = expansions.find(e => e.id === card.expansion_id);
+                    return (
+                      <li key={card.id} className="flex items-center py-2">
+                        <span
+                          className="text-white font-semibold text-sm cursor-pointer relative"
+                          onMouseEnter={e => {
+                            const preview = document.createElement('div');
+                            preview.className = 'fixed z-50 p-1 bg-black/80 rounded border border-white/20';
+                            preview.style.left = `${e.clientX + 10}px`;
+                            preview.style.top = `${e.clientY - 20}px`;
+                            preview.innerHTML = `<img src='${card.image}' style='width:60px;height:80px;object-fit:cover;border-radius:4px;' />`;
+                            preview.id = `preview-${card.id}`;
+                            document.body.appendChild(preview);
+                          }}
+                          onMouseLeave={() => {
+                            const preview = document.getElementById(`preview-${card.id}`);
+                            if (preview) preview.remove();
+                          }}
+                        >
+                          {card.name}
+                        </span>
+                        <span className="ml-2 text-xs text-white/70">({expansion?.name})</span>
+                        {card.holo && <Badge className="ml-2 text-xs bg-gradient-to-r from-blue-400 to-purple-500 text-white">Holo</Badge>}
+                        <div className="flex-1" />
+                        <Button size="sm" variant="outline" onClick={() => { setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xs mr-1">Modifica</Button>
+                        <Button size="sm" variant="destructive" onClick={() => deleteCard(card.id)} className="text-xs">Elimina</Button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-4 lg:grid-cols-6 gap-2">
+                {cards.map((card) => {
+                  const expansion = expansions.find(e => e.id === card.expansion_id);
+                  return (
+                    <Card key={card.id} className="bg-black/20 border-white/10 backdrop-blur-sm p-2">
+                      <CardContent className="p-2">
+                        <div className="aspect-[3/4] mb-1 rounded-lg overflow-hidden w-16 h-20 mx-auto">
+                          <img src={card.image} alt={card.name} className="w-full h-full object-cover" />
+                        </div>
+                        <h3 className="text-white font-semibold text-xs mb-1 text-center truncate" title={card.name}>{card.name}</h3>
+                        <Badge className="text-xxs mb-1" style={{ backgroundColor: expansion?.color }}>{expansion?.name}</Badge>
+                        {card.holo && <Badge className="text-xxs bg-gradient-to-r from-blue-400 to-purple-500 text-white ml-1">Holo</Badge>}
+                        <div className="flex justify-center mt-1">
+                          <Button size="sm" variant="outline" onClick={() => { setEditingCard(card); setCardForm({ name: card.name, expansion_id: card.expansion_id, image: card.image, holo: card.holo || false }); }} className="border-white/30 text-white hover:bg-white/10 text-xxs mr-1">Modifica</Button>
+                          <Button size="sm" variant="destructive" onClick={() => deleteCard(card.id)} className="text-xxs">Elimina</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </TabsContent>
 
           {/* Users Tab */}
