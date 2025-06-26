@@ -34,12 +34,14 @@ class ExpansionCreate(BaseModel):
     description: str
     color: str
     image: Optional[str] = None
+    published: bool = False  # Nuovo campo
 
 class ExpansionUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     color: Optional[str] = None
     image: Optional[str] = None
+    published: Optional[bool] = None  # Nuovo campo
 
 class Expansion(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -48,6 +50,7 @@ class Expansion(BaseModel):
     color: str
     total_cards: int = 0
     image: str = ""
+    published: bool = False  # Nuovo campo
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class CardCreate(BaseModel):

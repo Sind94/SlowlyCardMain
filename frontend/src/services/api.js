@@ -57,17 +57,14 @@ export const expansionAPI = {
     const response = await api.get('/expansions');
     return response.data;
   },
-  
-  create: async (expansionData) => {
-    const response = await api.post('/expansions', expansionData);
+  create: async (expansion) => {
+    const response = await api.post('/expansions', expansion);
     return response.data;
   },
-  
-  update: async (id, expansionData) => {
-    const response = await api.put(`/expansions/${id}`, expansionData);
+  update: async (id, expansion) => {
+    const response = await api.put(`/expansions/${id}`, expansion);
     return response.data;
   },
-  
   delete: async (id) => {
     const response = await api.delete(`/expansions/${id}`);
     return response.data;

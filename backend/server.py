@@ -132,9 +132,11 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
 # ========== EXPANSION ENDPOINTS ==========
 
 @api_router.get("/expansions", response_model=List[Expansion])
-async def get_expansions():
-    """Get all expansions"""
-    expansions = await db.expansions.find().to_list(1000)
+async def get_expansions(current_user: User = Depends(get_current_user)):
+    """Get all expansions. Solo le pubbliche per utenti normali, tutte per admin."""
+    user_is_admin = getattr(current_user, 'is_admin', False)
+    query = {} if user_is_admin else {"published": True}
+    expansions = await db.expansions.find(query).to_list(1000)
     return [Expansion(**expansion) for expansion in expansions]
 
 @api_router.post("/expansions", response_model=Expansion)
@@ -155,15 +157,12 @@ async def update_expansion(
 ):
     """Update an expansion (Admin only)"""
     update_data = {k: v for k, v in expansion_data.dict().items() if v is not None}
-    
     result = await db.expansions.update_one(
         {"id": expansion_id},
         {"$set": update_data}
     )
-    
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Expansion not found")
-    
     updated_expansion = await db.expansions.find_one({"id": expansion_id})
     return Expansion(**updated_expansion)
 
@@ -176,28 +175,31 @@ async def delete_expansion(
     # Trova tutte le carte dell'espansione
     cards = await db.cards.find({"expansion_id": expansion_id}).to_list(1000)
     card_ids = [card["id"] for card in cards]
-
     # Elimina tutte le carte dell'espansione
     await db.cards.delete_many({"expansion_id": expansion_id})
-
-    # Rimuovi tutti gli ID delle carte eliminate da tutti gli utenti
+    # Rimuovi le carte eliminate dagli utenti
     if card_ids:
         await db.users.update_many({}, {"$pull": {"found_cards": {"$in": card_ids}}})
-
     # Elimina l'espansione
-    result = await db.expansions.delete_one({"id": expansion_id})
-
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Expansion not found")
-
+    await db.expansions.delete_one({"id": expansion_id})
     return {"message": "Expansion and all its cards deleted successfully"}
 
 # ========== CARD ENDPOINTS ==========
 
 @api_router.get("/cards", response_model=List[Card])
-async def get_cards(expansion_id: str = None):
-    """Get all cards or cards from specific expansion"""
-    query = {"expansion_id": expansion_id} if expansion_id else {}
+async def get_cards(expansion_id: str = None, current_user: User = Depends(get_current_user)):
+    """Get all cards or cards from specific expansion. Solo carte di espansioni pubbliche per utenti normali."""
+    user_is_admin = getattr(current_user, 'is_admin', False)
+    query = {}
+    if expansion_id:
+        query["expansion_id"] = expansion_id
+    if not user_is_admin:
+        # Recupera solo carte di espansioni pubbliche
+        public_expansions = await db.expansions.find({"published": True}).to_list(1000)
+        public_ids = [exp["id"] for exp in public_expansions]
+        query["expansion_id"] = {"$in": public_ids} if not expansion_id else expansion_id if expansion_id in public_ids : None
+        if query["expansion_id"] is None:
+            return []
     cards = await db.cards.find(query).to_list(1000)
     return [Card(**card) for card in cards]
 

@@ -27,7 +27,8 @@ const Admin = () => {
     name: '',
     description: '',
     color: '#3b82f6',
-    image: ''
+    image: '',
+    published: false // Nuovo campo
   });
   const [cardForm, setCardForm] = useState({
     name: '',
@@ -422,6 +423,16 @@ const Admin = () => {
                       <img src={expansionForm.image} alt="Anteprima" className="w-24 h-32 object-cover rounded-lg border border-white/20" />
                     </div>
                   )}
+                  <div className="flex items-center space-x-2">
+                    <input
+                      id="exp-published"
+                      type="checkbox"
+                      checked={expansionForm.published}
+                      onChange={e => setExpansionForm({ ...expansionForm, published: e.target.checked })}
+                      className="form-checkbox h-5 w-5 text-green-500"
+                    />
+                    <Label htmlFor="exp-published" className="text-white">Pubblica</Label>
+                  </div>
                   <div className="flex space-x-2">
                     <Button type="submit" className="bg-gradient-to-r from-green-500 to-emerald-600" disabled={expansionImageUploading || !expansionForm.image}>
                       {editingExpansion ? 'Aggiorna' : 'Crea'} Espansione
@@ -476,7 +487,8 @@ const Admin = () => {
                             name: expansion.name,
                             description: expansion.description,
                             color: expansion.color,
-                            image: expansion.image || ''
+                            image: expansion.image || '',
+                            published: expansion.published ?? false
                           });
                         }}
                         className="border-white/30 text-white hover:bg-white/10"

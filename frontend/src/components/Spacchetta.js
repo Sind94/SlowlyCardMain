@@ -37,7 +37,8 @@ const Spacchetta = () => {
     const fetchExpansions = async () => {
       try {
         const data = await expansionAPI.getAll();
-        setExpansions(data);
+        // Mostra solo le espansioni pubblicate
+        setExpansions(data.filter(exp => exp.published));
       } catch (error) {
         console.error('Error fetching expansions:', error);
         toast({

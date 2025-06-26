@@ -30,7 +30,8 @@ const Album = () => {
           cardAPI.getAll(),
           authAPI.getCurrentUser()
         ]);
-        setExpansions(expansionsData);
+        // Mostra solo le espansioni pubblicate
+        setExpansions(expansionsData.filter(exp => exp.published));
         setCards(allCardsData);
         setLocalUser(userData);
       } catch (error) {
