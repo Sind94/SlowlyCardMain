@@ -102,8 +102,14 @@ const Admin = () => {
   const [editingCard, setEditingCard] = useState(null);
   const [selectedCardModal, setSelectedCardModal] = useState(null);
 
-  // Check if user is admin
+  // DEBUG: log user e isAdmin
+  console.log('Admin.js user:', user);
   const isAdmin = user?.is_admin;
+  if (!isAdmin) {
+    return <div style={{color:'red',padding:32}}>Accesso negato o errore dati utente. isAdmin: {String(isAdmin)}<br/>user: {JSON.stringify(user)}</div>;
+  }
+
+  // Check if user is admin
   const imgurClientId = '546b1b1b1b1b1b1'; // Sostituisci con il tuo client ID Imgur se vuoi personalizzato
   const fileInputRef = useRef();
 
