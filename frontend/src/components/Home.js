@@ -28,6 +28,10 @@ const Home = () => {
     fetchExpansions();
   }, []);
 
+  // Filtra le espansioni pubblicate se l'utente non è admin
+  const isAdmin = user?.role === 'admin';
+  const publicExpansions = isAdmin ? expansions : expansions.filter(e => e.published);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       {/* Header */}
@@ -134,7 +138,7 @@ const Home = () => {
                   <p className="text-white/70">Carte Trovate</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-green-400">{loading ? '...' : expansions.length}</p>
+                  <p className="text-3xl font-bold text-green-400">{loading ? '...' : publicExpansions.length}</p>
                   <p className="text-white/70">Espansioni</p>
                 </div>
               </div>
@@ -143,13 +147,13 @@ const Home = () => {
         </div>
 
         {/* Quick Expansions Preview */}
-        {!loading && expansions.length > 0 && (
+        {!loading && publicExpansions.length > 0 && (
           <div className="mt-16">
             <h3 className="text-3xl font-bold text-white text-center mb-8">
               Espansioni Disponibili
             </h3>
             <div className="grid md:grid-cols-3 gap-6">
-              {expansions.slice(0, 3).map((expansion) => (
+              {publicExpansions.slice(0, 3).map((expansion) => (
                 <Card 
                   key={expansion.id}
                   className="bg-black/20 border-white/10 backdrop-blur-sm transform transition-all duration-300 hover:scale-105 cursor-pointer"
@@ -183,7 +187,7 @@ const Home = () => {
                 </Card>
               ))}
             </div>
-            {expansions.length > 3 && (
+            {publicExpansions.length > 3 && (
               <div className="text-center mt-6">
                 <Button 
                   onClick={() => navigate('/spacchetta')}
