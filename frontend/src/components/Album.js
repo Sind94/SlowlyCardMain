@@ -89,6 +89,8 @@ const Album = () => {
         return new Date(a.created_at) - new Date(b.created_at);
       }
     });
+    // Mostra la modale solo se siamo dentro l'espansione e l'utente clicca l'immagine
+    const showExpansionImageModal = expansionImageDialogOpen && selectedExpansion.image;
     
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
@@ -197,33 +199,23 @@ const Album = () => {
               );
             })}
           </div>
-          {/* MODALE ZOOM IMMAGINE */}
-          <Dialog open={dialogOpen} onOpenChange={v => {
-            setDialogOpen(v);
-            if (!v) setSelectedCard(null);
-          }}>
-            <DialogContent className="max-w-2xl">
-              {selectedCard && (
-                <>
-                  <DialogHeader>
-                    <DialogTitle>{selectedCard.name}</DialogTitle>
-                  </DialogHeader>
-                  <div className="flex flex-col items-center">
-                    <div className="relative w-full max-w-md mb-4">
-                      <img
-                        src={selectedCard.image}
-                        alt={selectedCard.name}
-                        className="w-full rounded-lg shadow-lg"
-                        style={{ objectFit: 'contain', background: '#fff' }}
-                      />
-                      {selectedCard.holo && (
-                        <div className="absolute inset-0 pointer-events-none holo-effect rounded-lg" />
-                      )}
-                    </div>
-                    <div className="text-center text-white/80 text-lg mb-2">{selectedCard.description}</div>
-                  </div>
-                </>
-              )}
+          {/* MODALE ZOOM IMMAGINE ESPANSIONE SOLO QUI */}
+          <Dialog open={showExpansionImageModal} onOpenChange={v => setExpansionImageDialogOpen(v)}>
+            <DialogContent className="max-w-xl">
+              <DialogHeader>
+                <DialogTitle>{selectedExpansion.name}</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col items-center">
+                <div className="relative w-full max-w-md mb-4">
+                  <img
+                    src={selectedExpansion.image}
+                    alt={selectedExpansion.name}
+                    className="w-full rounded-lg shadow-lg"
+                    style={{ objectFit: 'contain', background: '#fff' }}
+                  />
+                </div>
+                <div className="text-center text-white/80 text-lg mb-2">{selectedExpansion.description}</div>
+              </div>
             </DialogContent>
           </Dialog>
         </main>
@@ -340,29 +332,6 @@ const Album = () => {
             );
           })}
         </div>
-        {/* Dialog per immagine espansione */}
-        <Dialog open={expansionImageDialogOpen} onOpenChange={v => setExpansionImageDialogOpen(v)}>
-          <DialogContent className="max-w-xl">
-            {selectedExpansionImage && (
-              <>
-                <DialogHeader>
-                  <DialogTitle>{selectedExpansionImage.name}</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col items-center">
-                  <div className="relative w-full max-w-md mb-4">
-                    <img
-                      src={selectedExpansionImage.image}
-                      alt={selectedExpansionImage.name}
-                      className="w-full rounded-lg shadow-lg"
-                      style={{ objectFit: 'contain', background: '#fff' }}
-                    />
-                  </div>
-                  <div className="text-center text-white/80 text-lg mb-2">{selectedExpansionImage.description}</div>
-                </div>
-              </>
-            )}
-          </DialogContent>
-        </Dialog>
 
         {/* Overall Stats */}
         <div className="mt-16">
