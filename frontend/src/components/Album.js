@@ -218,6 +218,35 @@ const Album = () => {
               </div>
             </DialogContent>
           </Dialog>
+          {/* MODALE ZOOM IMMAGINE CARTA */}
+          <Dialog open={dialogOpen} onOpenChange={v => {
+            setDialogOpen(v);
+            if (!v) setSelectedCard(null);
+          }}>
+            <DialogContent className="max-w-2xl">
+              {selectedCard && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>{selectedCard.name}</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex flex-col items-center">
+                    <div className="relative w-full max-w-md mb-4">
+                      <img
+                        src={selectedCard.image}
+                        alt={selectedCard.name}
+                        className="w-full rounded-lg shadow-lg"
+                        style={{ objectFit: 'contain', background: '#fff' }}
+                      />
+                      {selectedCard.holo && (
+                        <div className="absolute inset-0 pointer-events-none holo-effect rounded-lg" />
+                      )}
+                    </div>
+                    <div className="text-center text-white/80 text-lg mb-2">{selectedCard.description}</div>
+                  </div>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     );
