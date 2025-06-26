@@ -58,6 +58,8 @@ const Admin = () => {
 
   // Vista carte: griglia o elenco
   const [cardsViewMode, setCardsViewMode] = useState('list');
+  // Vista espansioni: griglia o elenco
+  const [expansionsViewMode, setExpansionsViewMode] = useState('list');
 
   // Funzione generica upload ImgBB
   const uploadToImgBB = async (file) => {
